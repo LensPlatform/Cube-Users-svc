@@ -20,13 +20,13 @@ type Service interface {
 	// Creates a valid JWT
 	Signin(context.Context, *SigninPayload) (res *Creds, err error)
 	// CreateUser implements CreateUser.
-	CreateUser(context.Context, *CreateUserPayload) (res string, err error)
+	CreateUser(context.Context, *CreateUserPayload) (res int, err error)
 	// CreateProfile implements CreateProfile.
-	CreateProfile(context.Context, *CreateProfilePayload) (res string, err error)
+	CreateProfile(context.Context, *CreateProfilePayload) (res int, err error)
 	// CreateUserSubscription implements CreateUserSubscription.
-	CreateUserSubscription(context.Context, *CreateUserSubscriptionPayload) (res string, err error)
+	CreateUserSubscription(context.Context, *CreateUserSubscriptionPayload) (res int, err error)
 	// GetUser implements GetUser.
-	GetUser(context.Context, *GetUserPayload) (res string, err error)
+	GetUser(context.Context, *GetUserPayload) (res *User, err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -69,32 +69,45 @@ type Creds struct {
 // CreateUser method.
 type CreateUserPayload struct {
 	// User to be created
-	User string
+	User *User
 }
 
 // CreateProfilePayload is the payload type of the users-microservice service
 // CreateProfile method.
 type CreateProfilePayload struct {
 	// Profile
-	Profile string
+	Profile *Profile
 	// user id token which the profile is tied to
-	UserID string
+	UserID int64
 }
 
 // CreateUserSubscriptionPayload is the payload type of the users-microservice
 // service CreateUserSubscription method.
 type CreateUserSubscriptionPayload struct {
 	// User Subscription
-	Subscription string
+	Subscription *Subscription
 	// user id to which the subscription is to be created for
-	UserID string
+	UserID int64
 }
 
 // GetUserPayload is the payload type of the users-microservice service GetUser
 // method.
 type GetUserPayload struct {
 	// User id
-	UserID string
+	UserID int64
+}
+
+// User is the result type of the users-microservice service GetUser method.
+type User struct {
+	Body interface{}
+}
+
+type Profile struct {
+	Body interface{}
+}
+
+type Subscription struct {
+	Body interface{}
 }
 
 // Credentials are invalid

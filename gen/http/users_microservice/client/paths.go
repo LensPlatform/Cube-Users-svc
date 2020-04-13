@@ -32,6 +32,6 @@ func CreateUserSubscriptionUsersMicroservicePath() string {
 }
 
 // GetUserUsersMicroservicePath returns the URL path to the users-microservice service GetUser HTTP endpoint.
-func GetUserUsersMicroservicePath(userID string) string {
+func GetUserUsersMicroservicePath(userID int64) string {
 	return fmt.Sprintf("/users-microservice/user/%v", userID)
 }

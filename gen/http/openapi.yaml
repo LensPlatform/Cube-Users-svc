@@ -28,6 +28,20 @@ paths:
       schemes:
       - http
       - https
+  /swagger/swaggerui/*filepath:
+    get:
+      tags:
+      - swagger
+      summary: Download swaggerui/dist
+      operationId: swagger#/swagger/swaggerui/*filepath
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+      schemes:
+      - http
+      - https
   /users-microservice/signin:
     post:
       tags:
@@ -88,12 +102,13 @@ paths:
         in: path
         description: User id
         required: true
-        type: string
+        type: integer
+        format: int64
       responses:
         "200":
           description: OK response.
           schema:
-            type: string
+            $ref: '#/definitions/UsersMicroserviceGetUserResponseBody'
         "401":
           description: Unauthorized response.
           schema:
@@ -123,7 +138,8 @@ paths:
         "200":
           description: OK response.
           schema:
-            type: string
+            type: integer
+            format: int64
         "401":
           description: Unauthorized response.
           schema:
@@ -152,7 +168,8 @@ paths:
         "200":
           description: OK response.
           schema:
-            type: string
+            type: integer
+            format: int64
         "401":
           description: Unauthorized response.
           schema:
@@ -182,7 +199,8 @@ paths:
         "200":
           description: OK response.
           schema:
-            type: string
+            type: integer
+            format: int64
         "401":
           description: Unauthorized response.
           schema:
@@ -194,21 +212,45 @@ paths:
       schemes:
       - http
 definitions:
+  ProfileRequestBody:
+    title: ProfileRequestBody
+    type: object
+    properties:
+      body:
+        example: Id eum voluptatem.
+    example:
+      body: Deserunt sequi sunt aliquam vel ipsum quae.
+  SubscriptionRequestBody:
+    title: SubscriptionRequestBody
+    type: object
+    properties:
+      body:
+        example: Consectetur sit dolores.
+    example:
+      body: Nesciunt ut adipisci.
+  UserRequestBody:
+    title: UserRequestBody
+    type: object
+    properties:
+      body:
+        example: Cupiditate enim.
+    example:
+      body: Enim neque blanditiis.
   UsersMicroserviceCreateProfileRequestBody:
     title: UsersMicroserviceCreateProfileRequestBody
     type: object
     properties:
       profile:
-        type: string
-        description: Profile
-        example: Quas debitis voluptatem.
+        $ref: '#/definitions/ProfileRequestBody'
       user_id:
-        type: string
+        type: integer
         description: user id token which the profile is tied to
-        example: Asperiores vitae distinctio dolore eaque reiciendis exercitationem.
+        example: 496817533096959351
+        format: int64
     example:
-      profile: Eveniet saepe nihil praesentium.
-      user_id: Doloribus minus est laboriosam eius enim.
+      profile:
+        body: Et fugit modi error.
+      user_id: 3286011864502325541
     required:
     - profile
     - user_id
@@ -219,7 +261,7 @@ definitions:
       fault:
         type: boolean
         description: Is the error a server-side fault?
-        example: true
+        example: false
       id:
         type: string
         description: ID is a unique identifier for this particular occurrence of the
@@ -241,7 +283,7 @@ definitions:
       timeout:
         type: boolean
         description: Is the error a timeout?
-        example: true
+        example: false
     description: operation timed out, retry later. (default view)
     example:
       fault: false
@@ -261,17 +303,16 @@ definitions:
     title: UsersMicroserviceCreateProfileUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Aut molestiae consequatur quaerat qui aut vel.
+    example: Et quam labore ipsa.
   UsersMicroserviceCreateUserRequestBody:
     title: UsersMicroserviceCreateUserRequestBody
     type: object
     properties:
       user:
-        type: string
-        description: User to be created
-        example: Laboriosam sequi esse reiciendis sit harum blanditiis.
+        $ref: '#/definitions/UserRequestBody'
     example:
-      user: Vel odio.
+      user:
+        body: Nemo eum rerum.
     required:
     - user
   UsersMicroserviceCreateUserSubscriptionRequestBody:
@@ -279,16 +320,16 @@ definitions:
     type: object
     properties:
       subscription:
-        type: string
-        description: User Subscription
-        example: Sapiente aliquam.
+        $ref: '#/definitions/SubscriptionRequestBody'
       user_id:
-        type: string
+        type: integer
         description: user id to which the subscription is to be created for
-        example: Repellendus beatae mollitia qui.
+        example: 1082167360676398572
+        format: int64
     example:
-      subscription: Reiciendis et.
-      user_id: Est est.
+      subscription:
+        body: Ut libero vero veniam voluptate eos.
+      user_id: 9088204190720472173
     required:
     - subscription
     - user_id
@@ -299,7 +340,7 @@ definitions:
       fault:
         type: boolean
         description: Is the error a server-side fault?
-        example: true
+        example: false
       id:
         type: string
         description: ID is a unique identifier for this particular occurrence of the
@@ -317,19 +358,19 @@ definitions:
       temporary:
         type: boolean
         description: Is the error temporary?
-        example: true
+        example: false
       timeout:
         type: boolean
         description: Is the error a timeout?
-        example: false
+        example: true
     description: operation timed out, retry later. (default view)
     example:
-      fault: false
+      fault: true
       id: 123abc
       message: parameter 'p' must be an integer
       name: bad_request
       temporary: false
-      timeout: true
+      timeout: false
     required:
     - name
     - id
@@ -341,7 +382,7 @@ definitions:
     title: UsersMicroserviceCreateUserSubscriptionUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Odit dolorem id et pariatur autem.
+    example: Qui debitis dolorem ipsa qui laudantium modi.
   UsersMicroserviceCreateUserTimeoutResponseBody:
     title: 'Mediatype identifier: application/vnd.goa.error; view=default'
     type: object
@@ -374,12 +415,12 @@ definitions:
         example: false
     description: operation timed out, retry later. (default view)
     example:
-      fault: false
+      fault: true
       id: 123abc
       message: parameter 'p' must be an integer
       name: bad_request
       temporary: false
-      timeout: true
+      timeout: false
     required:
     - name
     - id
@@ -391,7 +432,15 @@ definitions:
     title: UsersMicroserviceCreateUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Placeat facere reprehenderit voluptatem distinctio ut.
+    example: Voluptatem laborum ab ab magni consequatur.
+  UsersMicroserviceGetUserResponseBody:
+    title: UsersMicroserviceGetUserResponseBody
+    type: object
+    properties:
+      body:
+        example: Dolore incidunt voluptatem sit id voluptas.
+    example:
+      body: Molestiae consectetur ut non beatae omnis.
   UsersMicroserviceGetUserTimeoutResponseBody:
     title: 'Mediatype identifier: application/vnd.goa.error; view=default'
     type: object
@@ -417,19 +466,19 @@ definitions:
       temporary:
         type: boolean
         description: Is the error temporary?
-        example: true
+        example: false
       timeout:
         type: boolean
         description: Is the error a timeout?
-        example: false
+        example: true
     description: operation timed out, retry later. (default view)
     example:
-      fault: false
+      fault: true
       id: 123abc
       message: parameter 'p' must be an integer
       name: bad_request
-      temporary: false
-      timeout: true
+      temporary: true
+      timeout: false
     required:
     - name
     - id
@@ -441,7 +490,7 @@ definitions:
     title: UsersMicroserviceGetUserUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Corrupti vitae quisquam molestiae et repudiandae est.
+    example: Quod impedit.
   UsersMicroserviceSigninRequestBody:
     title: UsersMicroserviceSigninRequestBody
     type: object
@@ -481,7 +530,7 @@ definitions:
     title: UsersMicroserviceSigninUnauthorizedResponseBody
     type: string
     description: Credentials are invalid
-    example: Veritatis occaecati.
+    example: Dolorum et minima.
 securityDefinitions:
   basic_header_Authorization:
     type: basic

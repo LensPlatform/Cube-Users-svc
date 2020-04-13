@@ -46,43 +46,43 @@ func (c *Client) Signin(ctx context.Context, p *SigninPayload) (res *Creds, err 
 
 // CreateUser calls the "CreateUser" endpoint of the "users-microservice"
 // service.
-func (c *Client) CreateUser(ctx context.Context, p *CreateUserPayload) (res string, err error) {
+func (c *Client) CreateUser(ctx context.Context, p *CreateUserPayload) (res int, err error) {
 	var ires interface{}
 	ires, err = c.CreateUserEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(string), nil
+	return ires.(int), nil
 }
 
 // CreateProfile calls the "CreateProfile" endpoint of the "users-microservice"
 // service.
-func (c *Client) CreateProfile(ctx context.Context, p *CreateProfilePayload) (res string, err error) {
+func (c *Client) CreateProfile(ctx context.Context, p *CreateProfilePayload) (res int, err error) {
 	var ires interface{}
 	ires, err = c.CreateProfileEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(string), nil
+	return ires.(int), nil
 }
 
 // CreateUserSubscription calls the "CreateUserSubscription" endpoint of the
 // "users-microservice" service.
-func (c *Client) CreateUserSubscription(ctx context.Context, p *CreateUserSubscriptionPayload) (res string, err error) {
+func (c *Client) CreateUserSubscription(ctx context.Context, p *CreateUserSubscriptionPayload) (res int, err error) {
 	var ires interface{}
 	ires, err = c.CreateUserSubscriptionEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(string), nil
+	return ires.(int), nil
 }
 
 // GetUser calls the "GetUser" endpoint of the "users-microservice" service.
-func (c *Client) GetUser(ctx context.Context, p *GetUserPayload) (res string, err error) {
+func (c *Client) GetUser(ctx context.Context, p *GetUserPayload) (res *User, err error) {
 	var ires interface{}
 	ires, err = c.GetUserEndpoint(ctx, p)
 	if err != nil {
 		return
 	}
-	return ires.(string), nil
+	return ires.(*User), nil
 }

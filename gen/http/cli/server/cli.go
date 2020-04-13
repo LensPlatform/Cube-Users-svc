@@ -211,7 +211,9 @@ CreateUser implements CreateUser.
 
 Example:
     `+os.Args[0]+` users-microservice create-user --body '{
-      "user": "Reprehenderit illo."
+      "user": {
+         "body": "Nemo eum rerum."
+      }
    }'
 `, os.Args[0])
 }
@@ -224,8 +226,10 @@ CreateProfile implements CreateProfile.
 
 Example:
     `+os.Args[0]+` users-microservice create-profile --body '{
-      "profile": "Ab magni consequatur tenetur cupiditate.",
-      "user_id": "Voluptatem enim neque."
+      "profile": {
+         "body": "Et fugit modi error."
+      },
+      "user_id": 5975922730373798934
    }'
 `, os.Args[0])
 }
@@ -238,19 +242,21 @@ CreateUserSubscription implements CreateUserSubscription.
 
 Example:
     `+os.Args[0]+` users-microservice create-user-subscription --body '{
-      "subscription": "Quae est.",
-      "user_id": "Deserunt error ipsum quas eum rerum repudiandae."
+      "subscription": {
+         "body": "Ut libero vero veniam voluptate eos."
+      },
+      "user_id": 3337468547924670136
    }'
 `, os.Args[0])
 }
 
 func usersMicroserviceGetUserUsage() {
-	fmt.Fprintf(os.Stderr, `%s [flags] users-microservice get-user -user-id STRING
+	fmt.Fprintf(os.Stderr, `%s [flags] users-microservice get-user -user-id INT64
 
 GetUser implements GetUser.
-    -user-id STRING: User id
+    -user-id INT64: User id
 
 Example:
-    `+os.Args[0]+` users-microservice get-user --user-id "Voluptas expedita consequatur qui fugiat quod."
+    `+os.Args[0]+` users-microservice get-user --user-id 210086296385265466
 `, os.Args[0])
 }

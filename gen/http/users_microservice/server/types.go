@@ -23,25 +23,25 @@ type SigninRequestBody struct {
 // "CreateUser" endpoint HTTP request body.
 type CreateUserRequestBody struct {
 	// User to be created
-	User *string `form:"user,omitempty" json:"user,omitempty" xml:"user,omitempty"`
+	User *UserRequestBody `form:"user,omitempty" json:"user,omitempty" xml:"user,omitempty"`
 }
 
 // CreateProfileRequestBody is the type of the "users-microservice" service
 // "CreateProfile" endpoint HTTP request body.
 type CreateProfileRequestBody struct {
 	// Profile
-	Profile *string `form:"profile,omitempty" json:"profile,omitempty" xml:"profile,omitempty"`
+	Profile *ProfileRequestBody `form:"profile,omitempty" json:"profile,omitempty" xml:"profile,omitempty"`
 	// user id token which the profile is tied to
-	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
+	UserID *int64 `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
 }
 
 // CreateUserSubscriptionRequestBody is the type of the "users-microservice"
 // service "CreateUserSubscription" endpoint HTTP request body.
 type CreateUserSubscriptionRequestBody struct {
 	// User Subscription
-	Subscription *string `form:"subscription,omitempty" json:"subscription,omitempty" xml:"subscription,omitempty"`
+	Subscription *SubscriptionRequestBody `form:"subscription,omitempty" json:"subscription,omitempty" xml:"subscription,omitempty"`
 	// user id to which the subscription is to be created for
-	UserID *string `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
+	UserID *int64 `form:"user_id,omitempty" json:"user_id,omitempty" xml:"user_id,omitempty"`
 }
 
 // SigninResponseBody is the type of the "users-microservice" service "signin"
@@ -53,6 +53,12 @@ type SigninResponseBody struct {
 	APIKey string `form:"api_key" json:"api_key" xml:"api_key"`
 	// OAuth2 token
 	OauthToken string `form:"oauth_token" json:"oauth_token" xml:"oauth_token"`
+}
+
+// GetUserResponseBody is the type of the "users-microservice" service
+// "GetUser" endpoint HTTP response body.
+type GetUserResponseBody struct {
+	Body interface{} `form:"body,omitempty" json:"body,omitempty" xml:"body,omitempty"`
 }
 
 // SigninUnauthorizedResponseBody is the type of the "users-microservice"
@@ -151,6 +157,21 @@ type GetUserTimeoutResponseBody struct {
 // service "GetUser" endpoint HTTP response body for the "unauthorized" error.
 type GetUserUnauthorizedResponseBody string
 
+// UserRequestBody is used to define fields on request body types.
+type UserRequestBody struct {
+	Body interface{} `form:"body,omitempty" json:"body,omitempty" xml:"body,omitempty"`
+}
+
+// ProfileRequestBody is used to define fields on request body types.
+type ProfileRequestBody struct {
+	Body interface{} `form:"body,omitempty" json:"body,omitempty" xml:"body,omitempty"`
+}
+
+// SubscriptionRequestBody is used to define fields on request body types.
+type SubscriptionRequestBody struct {
+	Body interface{} `form:"body,omitempty" json:"body,omitempty" xml:"body,omitempty"`
+}
+
 // NewSigninResponseBody builds the HTTP response body from the result of the
 // "signin" endpoint of the "users-microservice" service.
 func NewSigninResponseBody(res *usersmicroservice.Creds) *SigninResponseBody {
@@ -158,6 +179,15 @@ func NewSigninResponseBody(res *usersmicroservice.Creds) *SigninResponseBody {
 		JWT:        res.JWT,
 		APIKey:     res.APIKey,
 		OauthToken: res.OauthToken,
+	}
+	return body
+}
+
+// NewGetUserResponseBody builds the HTTP response body from the result of the
+// "GetUser" endpoint of the "users-microservice" service.
+func NewGetUserResponseBody(res *usersmicroservice.User) *GetUserResponseBody {
+	body := &GetUserResponseBody{
+		Body: res.Body,
 	}
 	return body
 }
@@ -268,9 +298,8 @@ func NewSigninPayload(body *SigninRequestBody) *usersmicroservice.SigninPayload 
 // NewCreateUserPayload builds a users-microservice service CreateUser endpoint
 // payload.
 func NewCreateUserPayload(body *CreateUserRequestBody) *usersmicroservice.CreateUserPayload {
-	v := &usersmicroservice.CreateUserPayload{
-		User: *body.User,
-	}
+	v := &usersmicroservice.CreateUserPayload{}
+	v.User = unmarshalUserRequestBodyToUsersmicroserviceUser(body.User)
 
 	return v
 }
@@ -279,9 +308,9 @@ func NewCreateUserPayload(body *CreateUserRequestBody) *usersmicroservice.Create
 // endpoint payload.
 func NewCreateProfilePayload(body *CreateProfileRequestBody) *usersmicroservice.CreateProfilePayload {
 	v := &usersmicroservice.CreateProfilePayload{
-		Profile: *body.Profile,
-		UserID:  *body.UserID,
+		UserID: *body.UserID,
 	}
+	v.Profile = unmarshalProfileRequestBodyToUsersmicroserviceProfile(body.Profile)
 
 	return v
 }
@@ -290,16 +319,16 @@ func NewCreateProfilePayload(body *CreateProfileRequestBody) *usersmicroservice.
 // CreateUserSubscription endpoint payload.
 func NewCreateUserSubscriptionPayload(body *CreateUserSubscriptionRequestBody) *usersmicroservice.CreateUserSubscriptionPayload {
 	v := &usersmicroservice.CreateUserSubscriptionPayload{
-		Subscription: *body.Subscription,
-		UserID:       *body.UserID,
+		UserID: *body.UserID,
 	}
+	v.Subscription = unmarshalSubscriptionRequestBodyToUsersmicroserviceSubscription(body.Subscription)
 
 	return v
 }
 
 // NewGetUserPayload builds a users-microservice service GetUser endpoint
 // payload.
-func NewGetUserPayload(userID string) *usersmicroservice.GetUserPayload {
+func NewGetUserPayload(userID int64) *usersmicroservice.GetUserPayload {
 	v := &usersmicroservice.GetUserPayload{}
 	v.UserID = userID
 

@@ -17,3 +17,23 @@ var Credentials = Type("Creds", func() {
 	})
 	Required("jwt", "api_key", "oauth_token")
 })
+
+var User = Type("User", func() {
+	Field(1, "body", Any)
+})
+
+var Team = Type("Team", func() {
+	Field(1, "body", Any)
+})
+
+var Group = Type("Group", func() {
+	Field(1, "body", Any)
+})
+
+var Subscription = Type("Subscription", func() {
+	Field(1, "body", Any)
+})
+
+var Profile = Type("Profile", func() {
+	Field(1, "body", Any)
+})

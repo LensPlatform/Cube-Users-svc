@@ -10,8 +10,10 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	usersmicroservice "github.com/LensPlatform/cube_users/gen/users_microservice"
+	goa "goa.design/goa/v3/pkg"
 )
 
 // BuildSigninPayload builds the payload for the users-microservice signin
@@ -50,11 +52,18 @@ func BuildCreateUserPayload(usersMicroserviceCreateUserBody string) (*usersmicro
 	{
 		err = json.Unmarshal([]byte(usersMicroserviceCreateUserBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"user\": \"Reprehenderit illo.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"user\": {\n         \"body\": \"Nemo eum rerum.\"\n      }\n   }'")
+		}
+		if body.User == nil {
+			err = goa.MergeErrors(err, goa.MissingFieldError("user", "body"))
+		}
+		if err != nil {
+			return nil, err
 		}
 	}
-	v := &usersmicroservice.CreateUserPayload{
-		User: body.User,
+	v := &usersmicroservice.CreateUserPayload{}
+	if body.User != nil {
+		v.User = marshalUserRequestBodyToUsersmicroserviceUser(body.User)
 	}
 
 	return v, nil
@@ -68,12 +77,20 @@ func BuildCreateProfilePayload(usersMicroserviceCreateProfileBody string) (*user
 	{
 		err = json.Unmarshal([]byte(usersMicroserviceCreateProfileBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"profile\": \"Ab magni consequatur tenetur cupiditate.\",\n      \"user_id\": \"Voluptatem enim neque.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"profile\": {\n         \"body\": \"Et fugit modi error.\"\n      },\n      \"user_id\": 5975922730373798934\n   }'")
+		}
+		if body.Profile == nil {
+			err = goa.MergeErrors(err, goa.MissingFieldError("profile", "body"))
+		}
+		if err != nil {
+			return nil, err
 		}
 	}
 	v := &usersmicroservice.CreateProfilePayload{
-		Profile: body.Profile,
-		UserID:  body.UserID,
+		UserID: body.UserID,
+	}
+	if body.Profile != nil {
+		v.Profile = marshalProfileRequestBodyToUsersmicroserviceProfile(body.Profile)
 	}
 
 	return v, nil
@@ -87,12 +104,20 @@ func BuildCreateUserSubscriptionPayload(usersMicroserviceCreateUserSubscriptionB
 	{
 		err = json.Unmarshal([]byte(usersMicroserviceCreateUserSubscriptionBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"subscription\": \"Quae est.\",\n      \"user_id\": \"Deserunt error ipsum quas eum rerum repudiandae.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, example of valid JSON:\n%s", "'{\n      \"subscription\": {\n         \"body\": \"Ut libero vero veniam voluptate eos.\"\n      },\n      \"user_id\": 3337468547924670136\n   }'")
+		}
+		if body.Subscription == nil {
+			err = goa.MergeErrors(err, goa.MissingFieldError("subscription", "body"))
+		}
+		if err != nil {
+			return nil, err
 		}
 	}
 	v := &usersmicroservice.CreateUserSubscriptionPayload{
-		Subscription: body.Subscription,
-		UserID:       body.UserID,
+		UserID: body.UserID,
+	}
+	if body.Subscription != nil {
+		v.Subscription = marshalSubscriptionRequestBodyToUsersmicroserviceSubscription(body.Subscription)
 	}
 
 	return v, nil
@@ -101,9 +126,13 @@ func BuildCreateUserSubscriptionPayload(usersMicroserviceCreateUserSubscriptionB
 // BuildGetUserPayload builds the payload for the users-microservice GetUser
 // endpoint from CLI flags.
 func BuildGetUserPayload(usersMicroserviceGetUserUserID string) (*usersmicroservice.GetUserPayload, error) {
-	var userID string
+	var err error
+	var userID int64
 	{
-		userID = usersMicroserviceGetUserUserID
+		userID, err = strconv.ParseInt(usersMicroserviceGetUserUserID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("invalid value for userID, must be INT64")
+		}
 	}
 	v := &usersmicroservice.GetUserPayload{}
 	v.UserID = userID

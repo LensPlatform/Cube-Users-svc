@@ -54,6 +54,7 @@ func New(
 	return &Server{
 		Mounts: []*MountPoint{
 			{"../../gen/http/openapi.json", "GET", "/swagger/swagger.json"},
+			{"swaggerui/dist", "GET", "/swagger/swaggerui/*filepath"},
 		},
 	}
 }
@@ -70,10 +71,19 @@ func Mount(mux goahttp.Muxer) {
 	MountGenHTTPOpenapiJSON(mux, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "../../gen/http/openapi.json")
 	}))
+	MountSwaggeruiDist(mux, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "swaggerui/dist")
+	}))
 }
 
 // MountGenHTTPOpenapiJSON configures the mux to serve GET request made to
 // "/swagger/swagger.json".
 func MountGenHTTPOpenapiJSON(mux goahttp.Muxer, h http.Handler) {
 	mux.Handle("GET", "/swagger/swagger.json", h.ServeHTTP)
+}
+
+// MountSwaggeruiDist configures the mux to serve GET request made to
+// "/swagger/swaggerui/*filepath".
+func MountSwaggeruiDist(mux goahttp.Muxer, h http.Handler) {
+	mux.Handle("GET", "/swagger/swaggerui/*filepath", h.ServeHTTP)
 }

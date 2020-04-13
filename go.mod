@@ -3,6 +3,7 @@ module github.com/LensPlatform/cube_users
 go 1.13
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.4.1 // indirect
 	github.com/dimfeld/httptreemux/v5 v5.1.0 // indirect
 	github.com/golang/protobuf v1.4.0-rc.4
 	github.com/gorilla/websocket v1.4.2 // indirect

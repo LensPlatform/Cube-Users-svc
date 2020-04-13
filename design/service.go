@@ -19,10 +19,6 @@ var service = Service("users-microservice", func() {
 		Response("unauthorized", StatusUnauthorized)
 	})
 
-	GRPC(func() {
-		Response("unauthorized", CodeUnauthenticated)
-	})
-
 	Method("signin", func() {
 		Description("Creates a valid JWT")
 
@@ -51,20 +47,17 @@ var service = Service("users-microservice", func() {
 			Response(StatusOK)
 		})
 
-		GRPC(func() {
-			Response(CodeOK)
-		})
 	})
 
 	Method("CreateUser", func() {
 		Payload(func() {
-			Attribute("user", String, "User to be created", func() {
+			Attribute("user", User, "User to be created", func() {
 				Meta("rpc:tag", "1")
 			})
 			Required("user")
 		})
 
-		Result(String)
+		Result(Int)
 
 		// HTTP describes the HTTP transport mapping.
 		HTTP(func() {
@@ -77,27 +70,20 @@ var service = Service("users-microservice", func() {
 			Response("timeout", StatusGatewayTimeout)
 		})
 
-		// GRPC describes the gRPC transport mapping.
-		GRPC(func() {
-			// Responses use a "OK" gRPC code.
-			// The result is encoded in the response message.
-			Response(CodeOK)
-			Response("timeout", CodeDeadlineExceeded)
-		})
 	})
 
 	Method("CreateProfile", func() {
 		Payload(func() {
-			Attribute("profile", String, "Profile", func() {
+			Attribute("profile", Profile, "Profile", func() {
 				Meta("rpc:tag", "1")
 			})
-			Attribute("user_id", String, "user id token which the profile is tied to", func() {
+			Attribute("user_id", Int64, "user id token which the profile is tied to", func() {
 				Meta("rpc:tag", "2")
 			})
 			Required("profile", "user_id")
 		})
 
-		Result(String)
+		Result(Int)
 
 		// HTTP describes the HTTP transport mapping.
 		HTTP(func() {
@@ -106,25 +92,20 @@ var service = Service("users-microservice", func() {
 			Response("timeout", StatusGatewayTimeout)
 		})
 
-		// GRPC describes the gRPC transport mapping.
-		GRPC(func() {
-			Response(CodeOK)
-			Response("timeout", CodeDeadlineExceeded)
-		})
 	})
 
 	Method("CreateUserSubscription", func() {
 		Payload(func() {
-			Attribute("subscription", String, "User Subscription", func() {
+			Attribute("subscription", Subscription, "User Subscription", func() {
 				Meta("rpc:tag", "1")
 			})
-			Attribute("user_id", String, "user id to which the subscription is to be created for", func() {
+			Attribute("user_id", Int64, "user id to which the subscription is to be created for", func() {
 				Meta("rpc:tag", "2")
 			})
 			Required("subscription", "user_id")
 		})
 
-		Result(String)
+		Result(Int)
 
 		// HTTP describes the HTTP transport mapping.
 		HTTP(func() {
@@ -137,22 +118,17 @@ var service = Service("users-microservice", func() {
 			Response("timeout", StatusGatewayTimeout)
 		})
 
-		// GRPC describes the gRPC transport mapping.
-		GRPC(func() {
-			Response(CodeOK)
-			Response("timeout", CodeDeadlineExceeded)
-		})
 	})
 
 	Method("GetUser", func() {
 		Payload(func() {
-			Attribute("user_id", String, "User id", func() {
+			Attribute("user_id", Int64, "User id", func() {
 				Meta("rpc:tag", "1")
 			})
 			Required("user_id")
 		})
 
-		Result(String)
+		Result(User)
 
 		// HTTP describes the HTTP transport mapping.
 		HTTP(func() {
@@ -161,11 +137,6 @@ var service = Service("users-microservice", func() {
 			Response("timeout", StatusGatewayTimeout)
 		})
 
-		// GRPC describes the gRPC transport mapping.
-		GRPC(func() {
-			Response(CodeOK)
-			Response("timeout", CodeDeadlineExceeded)
-		})
 	})
 
 	// Serve the file with relative path ../../gen/http/openapi.json for
@@ -175,10 +146,14 @@ var service = Service("users-microservice", func() {
 
 var swaggerService = Service("swagger", func() {
 	Description("The swagger service serves the API swagger definition.")
+
 	HTTP(func() {
 		Path("/swagger")
 	})
+
 	Files("/swagger.json", "../../gen/http/openapi.json", func() {
 		Description("JSON document containing the API swagger definition")
 	})
+
+	Files("/swaggerui/*filepath", "swaggerui/dist")
 })

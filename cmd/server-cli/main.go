@@ -34,7 +34,8 @@ func main() {
 		if addr == "" {
 			switch *hostF {
 			case "development":
-				addr = "http://localhost:7999/users-microservice"
+				addr = "http://localhost:7999/{version}/users-microservice"
+				addr = strings.Replace(addr, "{version}", *versionF, -1)
 			case "production":
 				addr = "https://{version}/users-microservice"
 				addr = strings.Replace(addr, "{version}", *versionF, -1)
@@ -69,10 +70,8 @@ func main() {
 		switch scheme {
 		case "http", "https":
 			endpoint, payload, err = doHTTP(scheme, host, timeout, debug)
-		case "grpc", "grpcs":
-			endpoint, payload, err = doGRPC(scheme, host, timeout, debug)
 		default:
-			fmt.Fprintf(os.Stderr, "invalid scheme: %q (valid schemes: grpc|grpcs|http|https)\n", scheme)
+			fmt.Fprintf(os.Stderr, "invalid scheme: %q (valid schemes: http|https)\n", scheme)
 			os.Exit(1)
 		}
 	}

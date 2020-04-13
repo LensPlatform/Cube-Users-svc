@@ -158,7 +158,7 @@ func DecodeCreateUserResponse(decoder func(*http.Response) goahttp.Decoder, rest
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body string
+				body int
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
@@ -252,7 +252,7 @@ func DecodeCreateProfileResponse(decoder func(*http.Response) goahttp.Decoder, r
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body string
+				body int
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
@@ -348,7 +348,7 @@ func DecodeCreateUserSubscriptionResponse(decoder func(*http.Response) goahttp.D
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body string
+				body int
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
@@ -391,7 +391,7 @@ func DecodeCreateUserSubscriptionResponse(decoder func(*http.Response) goahttp.D
 // set to call the "users-microservice" service "GetUser" endpoint
 func (c *Client) BuildGetUserRequest(ctx context.Context, v interface{}) (*http.Request, error) {
 	var (
-		userID string
+		userID int64
 	)
 	{
 		p, ok := v.(*usersmicroservice.GetUserPayload)
@@ -436,14 +436,15 @@ func DecodeGetUserResponse(decoder func(*http.Response) goahttp.Decoder, restore
 		switch resp.StatusCode {
 		case http.StatusOK:
 			var (
-				body string
+				body GetUserResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("users-microservice", "GetUser", err)
 			}
-			return body, nil
+			res := NewGetUserUserOK(&body)
+			return res, nil
 		case http.StatusGatewayTimeout:
 			var (
 				body GetUserTimeoutResponseBody
@@ -473,4 +474,66 @@ func DecodeGetUserResponse(decoder func(*http.Response) goahttp.Decoder, restore
 			return nil, goahttp.ErrInvalidResponse("users-microservice", "GetUser", resp.StatusCode, string(body))
 		}
 	}
+}
+
+// marshalUsersmicroserviceUserToUserRequestBody builds a value of type
+// *UserRequestBody from a value of type *usersmicroservice.User.
+func marshalUsersmicroserviceUserToUserRequestBody(v *usersmicroservice.User) *UserRequestBody {
+	res := &UserRequestBody{
+		Body: v.Body,
+	}
+
+	return res
+}
+
+// marshalUserRequestBodyToUsersmicroserviceUser builds a value of type
+// *usersmicroservice.User from a value of type *UserRequestBody.
+func marshalUserRequestBodyToUsersmicroserviceUser(v *UserRequestBody) *usersmicroservice.User {
+	res := &usersmicroservice.User{
+		Body: v.Body,
+	}
+
+	return res
+}
+
+// marshalUsersmicroserviceProfileToProfileRequestBody builds a value of type
+// *ProfileRequestBody from a value of type *usersmicroservice.Profile.
+func marshalUsersmicroserviceProfileToProfileRequestBody(v *usersmicroservice.Profile) *ProfileRequestBody {
+	res := &ProfileRequestBody{
+		Body: v.Body,
+	}
+
+	return res
+}
+
+// marshalProfileRequestBodyToUsersmicroserviceProfile builds a value of type
+// *usersmicroservice.Profile from a value of type *ProfileRequestBody.
+func marshalProfileRequestBodyToUsersmicroserviceProfile(v *ProfileRequestBody) *usersmicroservice.Profile {
+	res := &usersmicroservice.Profile{
+		Body: v.Body,
+	}
+
+	return res
+}
+
+// marshalUsersmicroserviceSubscriptionToSubscriptionRequestBody builds a value
+// of type *SubscriptionRequestBody from a value of type
+// *usersmicroservice.Subscription.
+func marshalUsersmicroserviceSubscriptionToSubscriptionRequestBody(v *usersmicroservice.Subscription) *SubscriptionRequestBody {
+	res := &SubscriptionRequestBody{
+		Body: v.Body,
+	}
+
+	return res
+}
+
+// marshalSubscriptionRequestBodyToUsersmicroserviceSubscription builds a value
+// of type *usersmicroservice.Subscription from a value of type
+// *SubscriptionRequestBody.
+func marshalSubscriptionRequestBodyToUsersmicroserviceSubscription(v *SubscriptionRequestBody) *usersmicroservice.Subscription {
+	res := &usersmicroservice.Subscription{
+		Body: v.Body,
+	}
+
+	return res
 }

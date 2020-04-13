@@ -11,6 +11,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"strconv"
 
 	usersmicroservice "github.com/LensPlatform/cube_users/gen/users_microservice"
 	goahttp "goa.design/goa/v3/http"
@@ -88,7 +89,7 @@ func EncodeSigninError(encoder func(context.Context, http.ResponseWriter) goahtt
 // users-microservice CreateUser endpoint.
 func EncodeCreateUserResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
-		res := v.(string)
+		res := v.(int)
 		enc := encoder(ctx, w)
 		body := res
 		w.WriteHeader(http.StatusOK)
@@ -165,7 +166,7 @@ func EncodeCreateUserError(encoder func(context.Context, http.ResponseWriter) go
 // users-microservice CreateProfile endpoint.
 func EncodeCreateProfileResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
-		res := v.(string)
+		res := v.(int)
 		enc := encoder(ctx, w)
 		body := res
 		w.WriteHeader(http.StatusOK)
@@ -242,7 +243,7 @@ func EncodeCreateProfileError(encoder func(context.Context, http.ResponseWriter)
 // returned by the users-microservice CreateUserSubscription endpoint.
 func EncodeCreateUserSubscriptionResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
-		res := v.(string)
+		res := v.(int)
 		enc := encoder(ctx, w)
 		body := res
 		w.WriteHeader(http.StatusOK)
@@ -319,9 +320,9 @@ func EncodeCreateUserSubscriptionError(encoder func(context.Context, http.Respon
 // users-microservice GetUser endpoint.
 func EncodeGetUserResponse(encoder func(context.Context, http.ResponseWriter) goahttp.Encoder) func(context.Context, http.ResponseWriter, interface{}) error {
 	return func(ctx context.Context, w http.ResponseWriter, v interface{}) error {
-		res := v.(string)
+		res := v.(*usersmicroservice.User)
 		enc := encoder(ctx, w)
-		body := res
+		body := NewGetUserResponseBody(res)
 		w.WriteHeader(http.StatusOK)
 		return enc.Encode(body)
 	}
@@ -332,11 +333,22 @@ func EncodeGetUserResponse(encoder func(context.Context, http.ResponseWriter) go
 func DecodeGetUserRequest(mux goahttp.Muxer, decoder func(*http.Request) goahttp.Decoder) func(*http.Request) (interface{}, error) {
 	return func(r *http.Request) (interface{}, error) {
 		var (
-			userID string
+			userID int64
+			err    error
 
 			params = mux.Vars(r)
 		)
-		userID = params["user_id"]
+		{
+			userIDRaw := params["user_id"]
+			v, err2 := strconv.ParseInt(userIDRaw, 10, 64)
+			if err2 != nil {
+				err = goa.MergeErrors(err, goa.InvalidFieldTypeError("userID", userIDRaw, "integer"))
+			}
+			userID = v
+		}
+		if err != nil {
+			return nil, err
+		}
 		payload := NewGetUserPayload(userID)
 
 		return payload, nil
@@ -381,4 +393,35 @@ func EncodeGetUserError(encoder func(context.Context, http.ResponseWriter) goaht
 			return encodeError(ctx, w, v)
 		}
 	}
+}
+
+// unmarshalUserRequestBodyToUsersmicroserviceUser builds a value of type
+// *usersmicroservice.User from a value of type *UserRequestBody.
+func unmarshalUserRequestBodyToUsersmicroserviceUser(v *UserRequestBody) *usersmicroservice.User {
+	res := &usersmicroservice.User{
+		Body: v.Body,
+	}
+
+	return res
+}
+
+// unmarshalProfileRequestBodyToUsersmicroserviceProfile builds a value of type
+// *usersmicroservice.Profile from a value of type *ProfileRequestBody.
+func unmarshalProfileRequestBodyToUsersmicroserviceProfile(v *ProfileRequestBody) *usersmicroservice.Profile {
+	res := &usersmicroservice.Profile{
+		Body: v.Body,
+	}
+
+	return res
+}
+
+// unmarshalSubscriptionRequestBodyToUsersmicroserviceSubscription builds a
+// value of type *usersmicroservice.Subscription from a value of type
+// *SubscriptionRequestBody.
+func unmarshalSubscriptionRequestBodyToUsersmicroserviceSubscription(v *SubscriptionRequestBody) *usersmicroservice.Subscription {
+	res := &usersmicroservice.Subscription{
+		Body: v.Body,
+	}
+
+	return res
 }
