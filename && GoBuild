@@ -12,7 +12,6 @@ import (
 	"github.com/openzipkin/zipkin-go"
 	zipkinhttp "github.com/openzipkin/zipkin-go/reporter/http"
 
-	"github.com/LensPlatform/micro/pkg/database"
 	endpoint "github.com/LensPlatform/micro/pkg/endpoint"
 	grpc "github.com/LensPlatform/micro/pkg/grpc"
 	pb "github.com/LensPlatform/micro/pkg/grpc/pb"
@@ -45,9 +44,9 @@ var zipkinURL = fs.String("zipkin-url", "", "Enable Zipkin tracing via a collect
 var lightstepToken = fs.String("lightstep-token", "", "Enable LightStep tracing via a LightStep access token")
 var appdashAddr = fs.String("appdash-addr", "", "Enable Appdash tracing via an Appdash server host:port")
 var connType = fs.String("db-conn-type", "postgresql://", "database connection type")
-var connAddress = fs.String("db-conn-address", "doadmin:oqshd3sto72yyhgq@test-do-user-6612421-0.a.db.ondigitalocean.com:25060/", "database connection address")
-var connName = fs.String("db-conn-name", "defaultdb", "Database connection name")
-var connSettings = fs.String("db-conn-settings", "?sslmode=require", "database connection settings")
+var connAddress = fs.String("db-conn-address","doadmin:oqshd3sto72yyhgq@test-do-user-6612421-0.a.db.ondigitalocean.com:25060/", "database connection address")
+var connName = fs.String(("db-conn-name","defaultdb", "Database connection name")
+var connSettings = fs.String(("db-conn-settings","?sslmode=require", "database connection settings")
 
 func Run() {
 	fs.Parse(os.Args[1:])
@@ -118,11 +117,7 @@ func Run() {
 		tracer = opentracinggo.GlobalTracer()
 	}
 
-	err, db := database.New(connectionString, logger)
-	if err != nil {
-		logger.Log(err.Error())
-		os.Exit(1)
-	}
+	db := database.New(logger, connectionString)
 
 	svc := service.New(getServiceMiddleware(logger))
 	eps := endpoint.New(svc, getEndpointMiddleware(logger))

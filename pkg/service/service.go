@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"os"
 
+	"github.com/LensPlatform/cube_users/pkg/database"
 	model "github.com/LensPlatform/micro/pkg/models/proto"
+	"github.com/go-kit/kit/log"
 )
 
 // MicroService describes the service.
@@ -75,7 +78,9 @@ type MicroService interface {
 	GetGroupsByTags(ctx context.Context, tags string, limit int32) (error, []model.Group)
 }
 
-type basicMicroService struct{}
+type basicMicroService struct {
+	db *Database
+}
 
 func (b *basicMicroService) CreateUser(ctx context.Context, user model.User) (e0 error) {
 	// TODO implement the business logic of CreateUser
@@ -315,13 +320,20 @@ func (b *basicMicroService) GetGroupsByTags(ctx context.Context, tags string, li
 }
 
 // NewBasicMicroService returns a naive, stateless implementation of MicroService.
-func NewBasicMicroService() MicroService {
-	return &basicMicroService{}
+func NewBasicMicroService(conn string, logger log.Logger) MicroService {
+	err, db := database.New(conn, logger)
+	if err != nil {
+		logger.Log(err.Error())
+		os.Exit(1)
+	}
+	return &basicMicroService{
+		db: db,
+	}
 }
 
 // New returns a MicroService with all of the expected middleware wired in.
-func New(middleware []Middleware) MicroService {
-	var svc MicroService = NewBasicMicroService()
+func New(middleware []Middleware, conn string, logger log.Logger) MicroService {
+	var svc MicroService = NewBasicMicroService(conn, logger)
 	for _, m := range middleware {
 		svc = m(svc)
 	}
