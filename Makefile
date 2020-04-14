@@ -6,8 +6,11 @@ TAG?=latest
 NAME:=users-microservice-v1
 DOCKER_REPOSITORY:=cube
 DOCKER_IMAGE_NAME:=$(DOCKER_REPOSITORY)/$(NAME)
-GIT_COMMIT:=$(shell git describe --dirty --always)
-VERSION:=$(shell grep 'VERSION' src/pkg/version/version.go | awk '{ print $$4 }' | tr -d '"')
+#GIT_COMMIT:=$(shell git describe --dirty --always)
+#VERSION:=$(shell grep 'VERSION' src/pkg/version/version.go | awk '{ print $$4 }' | tr -d '"')
+
+serv:
+	cd .. && kit g s cube_users && kit g s cube_users -t grpc && kit g cube_users && kit g m hi -s cube_users -e && cd cube_users && kit g d 
 
 generate-service:
 	GO111MODULE= goa gen github.com/LensPlatform/cube_users/design && goa example github.com/LensPlatform/cube_users/design

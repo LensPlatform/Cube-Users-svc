@@ -1,0 +1,305 @@
+syntax = "proto3";
+
+package pb;
+
+
+
+//The Micro service definition.
+service Micro {
+ rpc CreateUser                   (CreateUserRequest                  ) returns (CreateUserReply                  );
+ rpc CreateProfile                (CreateProfileRequest               ) returns (CreateProfileReply               );
+ rpc CreateSubscription           (CreateSubscriptionRequest          ) returns (CreateSubscriptionReply          );
+ rpc CreateSubscriptions          (CreateSubscriptionsRequest         ) returns (CreateSubscriptionsReply         );
+ rpc UpdateUser                   (UpdateUserRequest                  ) returns (UpdateUserReply                  );
+ rpc UpdateUserProfile            (UpdateUserProfileRequest           ) returns (UpdateUserProfileReply           );
+ rpc UpdateUserSubscription       (UpdateUserSubscriptionRequest      ) returns (UpdateUserSubscriptionReply      );
+ rpc DeleteUser                   (DeleteUserRequest                  ) returns (DeleteUserReply                  );
+ rpc DeleteUserProfile            (DeleteUserProfileRequest           ) returns (DeleteUserProfileReply           );
+ rpc DeleteSubscription           (DeleteSubscriptionRequest          ) returns (DeleteSubscriptionReply          );
+ rpc GetUser                      (GetUserRequest                     ) returns (GetUserReply                     );
+ rpc GetUsers                     (GetUsersRequest                    ) returns (GetUsersReply                    );
+ rpc GetUsersByAccountType        (GetUsersByAccountTypeRequest       ) returns (GetUsersByAccountTypeReply       );
+ rpc GetUsersByIntent             (GetUsersByIntentRequest            ) returns (GetUsersByIntentReply            );
+ rpc GetUserProfile               (GetUserProfileRequest              ) returns (GetUserProfileReply              );
+ rpc GetUserProfiles              (GetUserProfilesRequest             ) returns (GetUserProfilesReply             );
+ rpc GetUserProfilesByType        (GetUserProfilesByTypeRequest       ) returns (GetUserProfilesByTypeReply       );
+ rpc GetUserProfilesByNationality (GetUserProfilesByNationalityRequest) returns (GetUserProfilesByNationalityReply);
+ rpc GetUserSubscriptions         (GetUserSubscriptionsRequest        ) returns (GetUserSubscriptionsReply        );
+ rpc CreateTeam                   (CreateTeamRequest                  ) returns (CreateTeamReply                  );
+ rpc CreatTeamProfile             (CreatTeamProfileRequest            ) returns (CreatTeamProfileReply            );
+ rpc CreateTeamSubscription       (CreateTeamSubscriptionRequest      ) returns (CreateTeamSubscriptionReply      );
+ rpc AddMemberToTeam              (AddMemberToTeamRequest             ) returns (AddMemberToTeamReply             );
+ rpc AddAdvisorToTeam             (AddAdvisorToTeamRequest            ) returns (AddAdvisorToTeamReply            );
+ rpc UpdateTeam                   (UpdateTeamRequest                  ) returns (UpdateTeamReply                  );
+ rpc UpdateTeamAdmin              (UpdateTeamAdminRequest             ) returns (UpdateTeamAdminReply             );
+ rpc UpdateTeamMember             (UpdateTeamMemberRequest            ) returns (UpdateTeamMemberReply            );
+ rpc UpdateTeamAdvisor            (UpdateTeamAdvisorRequest           ) returns (UpdateTeamAdvisorReply           );
+ rpc UpdateTeamProfile            (UpdateTeamProfileRequest           ) returns (UpdateTeamProfileReply           );
+ rpc UpdateTeamSubscription       (UpdateTeamSubscriptionRequest      ) returns (UpdateTeamSubscriptionReply      );
+ rpc DeleteTeam                   (DeleteTeamRequest                  ) returns (DeleteTeamReply                  );
+ rpc DeleteTeamProfile            (DeleteTeamProfileRequest           ) returns (DeleteTeamProfileReply           );
+ rpc DeleteTeamMember             (DeleteTeamMemberRequest            ) returns (DeleteTeamMemberReply            );
+ rpc DeleteTeamAdvisor            (DeleteTeamAdvisorRequest           ) returns (DeleteTeamAdvisorReply           );
+ rpc DeleteTeamAdmin              (DeleteTeamAdminRequest             ) returns (DeleteTeamAdminReply             );
+ rpc DeleteTeamSubscription       (DeleteTeamSubscriptionRequest      ) returns (DeleteTeamSubscriptionReply      );
+ rpc GetTeam                      (GetTeamRequest                     ) returns (GetTeamReply                     );
+ rpc GetTeamProfile               (GetTeamProfileRequest              ) returns (GetTeamProfileReply              );
+ rpc GetTeamSubscriptions         (GetTeamSubscriptionsRequest        ) returns (GetTeamSubscriptionsReply        );
+ rpc GetTeamMembers               (GetTeamMembersRequest              ) returns (GetTeamMembersReply              );
+ rpc GetTeamAdvisors              (GetTeamAdvisorsRequest             ) returns (GetTeamAdvisorsReply             );
+ rpc GetTeamAdmin                 (GetTeamAdminRequest                ) returns (GetTeamAdminReply                );
+ rpc GetTeams                     (GetTeamsRequest                    ) returns (GetTeamsReply                    );
+ rpc GetTeamsByType               (GetTeamsByTypeRequest              ) returns (GetTeamsByTypeReply              );
+ rpc GetTeamsByIndustry           (GetTeamsByIndustryRequest          ) returns (GetTeamsByIndustryReply          );
+ rpc GetTeamsByNumberOfEmployees  (GetTeamsByNumberOfEmployeesRequest ) returns (GetTeamsByNumberOfEmployeesReply );
+ rpc GetTeamProfiles              (GetTeamProfilesRequest             ) returns (GetTeamProfilesReply             );
+ rpc GetTeamsByTags               (GetTeamsByTagsRequest              ) returns (GetTeamsByTagsReply              );
+ rpc CreateGroup                  (CreateGroupRequest                 ) returns (CreateGroupReply                 );
+ rpc AddGroupMember               (AddGroupMemberRequest              ) returns (AddGroupMemberReply              );
+ rpc UpdateGroup                  (UpdateGroupRequest                 ) returns (UpdateGroupReply                 );
+ rpc UpdateGroupMember            (UpdateGroupMemberRequest           ) returns (UpdateGroupMemberReply           );
+ rpc DeleteGroup                  (DeleteGroupRequest                 ) returns (DeleteGroupReply                 );
+ rpc DeleteGroupMember            (DeleteGroupMemberRequest           ) returns (DeleteGroupMemberReply           );
+ rpc GetGroup                     (GetGroupRequest                    ) returns (GetGroupReply                    );
+ rpc GetGroups                    (GetGroupsRequest                   ) returns (GetGroupsReply                   );
+ rpc GetGroupsByType              (GetGroupsByTypeRequest             ) returns (GetGroupsByTypeReply             );
+ rpc GetGroupsByNumMembers        (GetGroupsByNumMembersRequest       ) returns (GetGroupsByNumMembersReply       );
+ rpc GetGroupsByTags              (GetGroupsByTagsRequest             ) returns (GetGroupsByTagsReply             );
+}
+
+message CreateUserRequest {}
+
+message CreateUserReply {}
+
+message CreateProfileRequest {}
+
+message CreateProfileReply {}
+
+message CreateSubscriptionRequest {}
+
+message CreateSubscriptionReply {}
+
+message CreateSubscriptionsRequest {}
+
+message CreateSubscriptionsReply {}
+
+message UpdateUserRequest {}
+
+message UpdateUserReply {}
+
+message UpdateUserProfileRequest {}
+
+message UpdateUserProfileReply {}
+
+message UpdateUserSubscriptionRequest {}
+
+message UpdateUserSubscriptionReply {}
+
+message DeleteUserRequest {}
+
+message DeleteUserReply {}
+
+message DeleteUserProfileRequest {}
+
+message DeleteUserProfileReply {}
+
+message DeleteSubscriptionRequest {}
+
+message DeleteSubscriptionReply {}
+
+message GetUserRequest {}
+
+message GetUserReply {}
+
+message GetUsersRequest {}
+
+message GetUsersReply {}
+
+message GetUsersByAccountTypeRequest {}
+
+message GetUsersByAccountTypeReply {}
+
+message GetUsersByIntentRequest {}
+
+message GetUsersByIntentReply {}
+
+message GetUserProfileRequest {}
+
+message GetUserProfileReply {}
+
+message GetUserProfilesRequest {}
+
+message GetUserProfilesReply {}
+
+message GetUserProfilesByTypeRequest {}
+
+message GetUserProfilesByTypeReply {}
+
+message GetUserProfilesByNationalityRequest {}
+
+message GetUserProfilesByNationalityReply {}
+
+message GetUserSubscriptionsRequest {}
+
+message GetUserSubscriptionsReply {}
+
+message CreateTeamRequest {}
+
+message CreateTeamReply {}
+
+message CreatTeamProfileRequest {}
+
+message CreatTeamProfileReply {}
+
+message CreateTeamSubscriptionRequest {}
+
+message CreateTeamSubscriptionReply {}
+
+message AddMemberToTeamRequest {}
+
+message AddMemberToTeamReply {}
+
+message AddAdvisorToTeamRequest {}
+
+message AddAdvisorToTeamReply {}
+
+message UpdateTeamRequest {}
+
+message UpdateTeamReply {}
+
+message UpdateTeamAdminRequest {}
+
+message UpdateTeamAdminReply {}
+
+message UpdateTeamMemberRequest {}
+
+message UpdateTeamMemberReply {}
+
+message UpdateTeamAdvisorRequest {}
+
+message UpdateTeamAdvisorReply {}
+
+message UpdateTeamProfileRequest {}
+
+message UpdateTeamProfileReply {}
+
+message UpdateTeamSubscriptionRequest {}
+
+message UpdateTeamSubscriptionReply {}
+
+message DeleteTeamRequest {}
+
+message DeleteTeamReply {}
+
+message DeleteTeamProfileRequest {}
+
+message DeleteTeamProfileReply {}
+
+message DeleteTeamMemberRequest {}
+
+message DeleteTeamMemberReply {}
+
+message DeleteTeamAdvisorRequest {}
+
+message DeleteTeamAdvisorReply {}
+
+message DeleteTeamAdminRequest {}
+
+message DeleteTeamAdminReply {}
+
+message DeleteTeamSubscriptionRequest {}
+
+message DeleteTeamSubscriptionReply {}
+
+message GetTeamRequest {}
+
+message GetTeamReply {}
+
+message GetTeamProfileRequest {}
+
+message GetTeamProfileReply {}
+
+message GetTeamSubscriptionsRequest {}
+
+message GetTeamSubscriptionsReply {}
+
+message GetTeamMembersRequest {}
+
+message GetTeamMembersReply {}
+
+message GetTeamAdvisorsRequest {}
+
+message GetTeamAdvisorsReply {}
+
+message GetTeamAdminRequest {}
+
+message GetTeamAdminReply {}
+
+message GetTeamsRequest {}
+
+message GetTeamsReply {}
+
+message GetTeamsByTypeRequest {}
+
+message GetTeamsByTypeReply {}
+
+message GetTeamsByIndustryRequest {}
+
+message GetTeamsByIndustryReply {}
+
+message GetTeamsByNumberOfEmployeesRequest {}
+
+message GetTeamsByNumberOfEmployeesReply {}
+
+message GetTeamProfilesRequest {}
+
+message GetTeamProfilesReply {}
+
+message GetTeamsByTagsRequest {}
+
+message GetTeamsByTagsReply {}
+
+message CreateGroupRequest {}
+
+message CreateGroupReply {}
+
+message AddGroupMemberRequest {}
+
+message AddGroupMemberReply {}
+
+message UpdateGroupRequest {}
+
+message UpdateGroupReply {}
+
+message UpdateGroupMemberRequest {}
+
+message UpdateGroupMemberReply {}
+
+message DeleteGroupRequest {}
+
+message DeleteGroupReply {}
+
+message DeleteGroupMemberRequest {}
+
+message DeleteGroupMemberReply {}
+
+message GetGroupRequest {}
+
+message GetGroupReply {}
+
+message GetGroupsRequest {}
+
+message GetGroupsReply {}
+
+message GetGroupsByTypeRequest {}
+
+message GetGroupsByTypeReply {}
+
+message GetGroupsByNumMembersRequest {}
+
+message GetGroupsByNumMembersReply {}
+
+message GetGroupsByTagsRequest {}
+
+message GetGroupsByTagsReply {}
+
