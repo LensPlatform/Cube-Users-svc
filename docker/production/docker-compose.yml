@@ -12,7 +12,7 @@ services:
       - "--entrypoints.web.address=:80"
     ports:
       - "81:81"
-      - "8089:8089"
+      - "8081:8081"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
@@ -71,11 +71,11 @@ services:
     depends_on:
       - storage
 
-  users-v2:
+  users-svc-v1:
     build:
-      context: .
-      dockerfile: ./Dockerfile
-    container_name: users-v2
+      context: ../..
+      dockerfile: ../../Dockerfile
+    container_name: users-svc-v1
     ports:
       - 8805:8085
       - 8804:8084
@@ -87,9 +87,6 @@ services:
       - stats
       - queue-ram1
       - queue-disc1
-    volumes:
-      - ./:/go/src/github.com/LensPlatform/Lens/services/user-service
-
   stats:
     image: bitnami/rabbitmq:3.7
     environment:
@@ -136,7 +133,7 @@ services:
     image: prom/prometheus:v2.17.1
     container_name: prometheus
     volumes:
-      - ./monitoring/prometheus:/etc/prometheus
+      - ./prometheus:/etc/prometheus
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -157,7 +154,7 @@ services:
     image: prom/alertmanager:v0.20.0
     container_name: alertmanager
     volumes:
-      - ./monitoring/alertmanager:/etc/alertmanager
+      - ./alertmanager:/etc/alertmanager
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
@@ -211,7 +208,7 @@ services:
     container_name: grafana
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/provisioning:/etc/grafana/provisioning
     environment:
       - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
@@ -244,7 +241,7 @@ services:
       - "9093:9093"
       - "9091:9091"
     volumes:
-      - ./monitoring/caddy:/etc/caddy
+      - ./caddy:/etc/caddy
     environment:
       - ADMIN_USER=${ADMIN_USER:-admin}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
@@ -266,6 +263,4 @@ volumes:
   rabbitmqdisc1_data:
     driver: local
   rabbitmqram1_data:
-    driver: local
-  code_volume:
     driver: local
