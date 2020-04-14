@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/LensPlatform/cube_users/pkg/database"
+	"github.com/LensPlatform/micro/pkg/database"
 	model "github.com/LensPlatform/micro/pkg/models/proto"
 	"github.com/go-kit/kit/log"
 )
@@ -79,7 +79,7 @@ type MicroService interface {
 }
 
 type basicMicroService struct {
-	db *Database
+	db *database.Database
 }
 
 func (b *basicMicroService) CreateUser(ctx context.Context, user model.User) (e0 error) {

@@ -12,7 +12,6 @@ import (
 	"github.com/openzipkin/zipkin-go"
 	zipkinhttp "github.com/openzipkin/zipkin-go/reporter/http"
 
-	"github.com/LensPlatform/micro/pkg/database"
 	endpoint "github.com/LensPlatform/micro/pkg/endpoint"
 	grpc "github.com/LensPlatform/micro/pkg/grpc"
 	pb "github.com/LensPlatform/micro/pkg/grpc/pb"
@@ -118,13 +117,7 @@ func Run() {
 		tracer = opentracinggo.GlobalTracer()
 	}
 
-	err, db := database.New(connectionString, logger)
-	if err != nil {
-		logger.Log(err.Error())
-		os.Exit(1)
-	}
-
-	svc := service.New(getServiceMiddleware(logger))
+	svc := service.New(getServiceMiddleware(logger), connectionString, logger)
 	eps := endpoint.New(svc, getEndpointMiddleware(logger))
 	g := createService(eps)
 	initMetricsEndpoint(g)
