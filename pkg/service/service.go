@@ -104,7 +104,7 @@ func (b *basicMicroService) CreateProfile(ctx context.Context, user_id int32, pr
 			return errors.New("User profile already exists")
 		} else {
 			// TODO implement create profile database interaction
-			return nil
+			return b.db.CreateUserProfile(user_id, profile)
 		}
 	} else {
 		return errors.New("User account does not exist. Please create a user account before creating a profile")
@@ -145,7 +145,11 @@ func (b *basicMicroService) DeleteSubscription(ctx context.Context, user_id int3
 	return e0
 }
 func (b *basicMicroService) GetUser(ctx context.Context, user_id int32) (e0 error, m1 model.User) {
-	// TODO implement the business logic of GetUser
+	e0, user := b.db.GetUserById(user_id)
+	if e0 != nil {
+		b.db.Logger.Log(e0.Error())
+	}
+	m1 = *user
 	return e0, m1
 }
 func (b *basicMicroService) GetUsers(ctx context.Context, limit int32) (e0 error, m1 []model.User) {

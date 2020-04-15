@@ -11,10 +11,11 @@ import (
 type IDatabase interface {
 	CreateUser(user model.User) error
 
+	CreateUserProfile(user_id int32, profile model.Profile) error
+	GetUserById(user_id int32) (error, *model.User)
 	DoesUserExists(user_id int32, username, email string) (error, bool)
 	DoesUserProfileExists(user_id, profile_id int32) (error, bool)
 	/*
-		CreateUserProfile(user_id int32, profile model.Profile) error
 		CreateUserSubscription(user_id int32, subscription model.Subscriptions) error
 		CreateUserSubscriptions(user_id int32, subscriptions []model.Subscriptions) error
 
@@ -26,7 +27,6 @@ type IDatabase interface {
 		DeleteUserProfile(user_id, profile_id int32) error
 		DeleteUserSubscription(user_id, subscription_id int32) error
 
-		GetUserById(user_id int32) (error, *model.User)
 		GetUserByUsername(username string) (error, *model.User)
 		GetUserByEmail(email string) (error, *model.User)
 		GetAllUsers(limit int32) (error, []*model.User)

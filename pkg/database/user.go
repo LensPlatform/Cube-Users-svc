@@ -17,14 +17,14 @@ func (db *Database) CreateUser(user model.User) error {
 			return err
 		}
 
-		// check if the user exists in the database base off of
+		// check if the user exists in the database based off of
 		// email and username
 		// Note: Email and Usernames must be unique across the entire database
 		if err = tx.Where("email = ?", user.Email).Or("username = ?", user.UserName).Find(&foundUser).Error; err != nil {
 			return err
 		}
 
-		// if the user already exists raise and error
+		// if the user already exists raise an error
 		if foundUser.UserName != "" || foundUser.Email != "" {
 			return errors.New("user already exists")
 		}
@@ -37,6 +37,82 @@ func (db *Database) CreateUser(user model.User) error {
 
 		// save the user to the database
 		if err := tx.Create(userOrm).Error; err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	return db.PerformTransaction(functor)
+}
+
+func (db *Database) GetUserById(user_id int32) (error, *model.User) {
+	// query the database for the user of interest
+	var user model.UserORM
+
+	if err := db.Engine.Where("id = ?", user_id).Find(&user).Error; err != nil {
+		return err, &model.User{}
+	}
+
+	// convert the obtained user ORM object to a user object and validate all fields are there
+	ctx := context.TODO()
+	userObj, err := user.ToPB(ctx)
+	if err != nil {
+		return err, &model.User{}
+	}
+
+	// perform field validation
+	if err = userObj.Validate(); err != nil {
+		return err, &model.User{}
+	}
+
+	return nil, &userObj
+}
+
+func (db *Database) CreateUserProfile(user_id int32, profile model.Profile) error {
+	functor := func(tx *gorm.DB) error {
+		var userOrm model.UserORM
+		err, exists := db.DoesUserExists(user_id, "", "")
+		if !exists && err != nil {
+			db.Logger.Log(err.Error())
+			return err
+		}
+
+		// query the database for user by user id
+		if err = tx.Where("id = ?", user_id).Find(&userOrm).Error; err != nil {
+			return err
+		}
+
+		ctx := context.TODO()
+		userObj, err := userOrm.ToPB(ctx)
+		if err != nil {
+			return err
+		}
+
+		// validate that the user has all the fields of interest
+		if err = userObj.Validate(); err != nil {
+			return err
+		}
+
+		// validate that the profile has al fields of interest as well
+		if err = profile.Validate(); err != nil {
+			return err
+		}
+
+		// check that the same profile does not already exist
+		err, profileExsts := db.DoesUserProfileExists(user_id)
+		if err != nil && !profileExsts {
+			return nil
+		}
+
+		// update the user ORM object with the profile ORM object
+		profileOrm, err := profile.ToORM(ctx)
+		if err != nil {
+			return nil
+		}
+
+		// Updates all fields in a user entity in the database
+		if err = tx.Model(userOrm).Updates(model.UserORM{ProfileId: &profileOrm}).Error; err != nil {
 			return err
 		}
 
@@ -101,6 +177,7 @@ func (db *Database) DoesUserProfileExists(user_id int32) (error, bool) {
 		// preliminarily, check if the user account exists
 		e0, exists := db.DoesUserExists(user_id, "", "")
 		if !exists {
+			db.Logger.Log(e0.Error())
 			return errors.New("User account does not exist. Create an account before a profile")
 		}
 
