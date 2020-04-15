@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"os"
 
 	"github.com/LensPlatform/micro/pkg/database"
@@ -83,12 +84,33 @@ type basicMicroService struct {
 }
 
 func (b *basicMicroService) CreateUser(ctx context.Context, user model.User) (e0 error) {
-	// TODO implement the business logic of CreateUser
-	return e0
+	if user.UserName == "" || user.Email == "" {
+		return errors.New("Invalid input parameters. User email and username does not exist.")
+	}
+
+	e0 = b.db.CreateUser(user)
+	if e0 != nil {
+		return e0
+	}
+	return nil
 }
 func (b *basicMicroService) CreateProfile(ctx context.Context, user_id int32, profile model.Profile) (e0 error) {
-	// TODO implement the business logic of CreateProfile
-	return e0
+	_, exists := b.db.DoesUserExists(user_id, "", "")
+	if exists {
+		// query the database for the profile and check for existence
+		_, profileExists := b.db.DoesUserProfileExists(user_id)
+
+		if profileExists {
+			return errors.New("User profile already exists")
+		} else {
+			// TODO implement create profile database interaction
+			return nil
+		}
+	} else {
+		return errors.New("User account does not exist. Please create a user account before creating a profile")
+	}
+
+	return nil
 }
 func (b *basicMicroService) CreateSubscription(ctx context.Context, user_id int32, subscription model.Subscriptions) (e0 error) {
 	// TODO implement the business logic of CreateSubscription

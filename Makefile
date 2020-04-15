@@ -6,14 +6,11 @@ TAG?=latest
 NAME:=users-microservice-v1
 DOCKER_REPOSITORY:=cube
 DOCKER_IMAGE_NAME:=$(DOCKER_REPOSITORY)/$(NAME)
-#GIT_COMMIT:=$(shell git describe --dirty --always)
+GIT_COMMIT:=$(shell git describe --dirty --always)
 #VERSION:=$(shell grep 'VERSION' src/pkg/version/version.go | awk '{ print $$4 }' | tr -d '"')
 
-serv:
+gen-serv:
 	cd .. && kit g s cube_users && kit g s cube_users -t grpc && kit g cube_users && kit g m hi -s cube_users -e && cd cube_users && kit g d 
-
-generate-service:
-	GO111MODULE= goa gen github.com/LensPlatform/cube_users/design && goa example github.com/LensPlatform/cube_users/design
 
 clean:
 	GO111MODULE= cd src && ./scripts/cleanup.sh && cd .. && go clean -modcache
@@ -24,14 +21,14 @@ format:
 
 start:
 	@echo "starting up services specified in docker-compose"
-	src/scripts/startservice.sh
+	./scripts/startservice.sh
 
 start-ignore-old:
 	@echo "starting all services while ignoring data from previous volumes"
 	docker-compose up -d --force-recreate --renew-anon-volumes
 
 run:
-	GO111MODULE=on go run -ldflags "-s -w -X github.com/LensPlatform/Lens/src/pkg/version.REVISION=$(GIT_COMMIT)" cmd/svc/* \
+	GO111MODULE=on go run -ldflags "-s -w -X github.com/LensPlatform/cube_users/pkg/version.REVISION=$(GIT_COMMIT)" cmd/* \
 	--level=debug --grpc-port=9999 --backend-url=https://httpbin.org/status/401 --backend-url=https://httpbin.org/status/500 \
 	--ui-logo=https://raw.githubusercontent.com/stefanprodan/podinfo/gh-pages/cuddle_clap.gif --ui-color=#34577c
 
@@ -63,7 +60,7 @@ build-container:
 # 	docker run --publish  8805:8085 --name bb $(DOCKER_IMAGE_NAME):$(VERSION) -v .:/go/src/Lens
 run-container:
 	docker build --tag $(DOCKER_IMAGE_NAME):$(VERSION) .
-	docker run  -v /Users/yoanyomba/go/src/github.com/LensPlatform/Lens/services/user-service:/go/src/github.com/LensPlatform/Lens/src --publish  8805:8085 --name bb $(DOCKER_IMAGE_NAME):$(VERSION)
+	docker run  -v /Users/yoanyomba/go/src/github.com/LensPlatform/cube_users/cmd:/go/src/github.com/LensPlatform/cube_users/cmd --publish  8805:8085 --name bb $(DOCKER_IMAGE_NAME):$(VERSION)
 
 test-container:
 	@docker rm -f podinfo || true

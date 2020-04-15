@@ -21,10 +21,10 @@ ENV ZIPKINBRIDGE true
 ENV LIGHTSTEP ""
 ENV AMQP_SERVER_URL amqp://guest:guest@rabbitmq:5672/
 
-WORKDIR /go/src/github.com/LensPlatform/Lens/services/user-service/
+WORKDIR /go/src/github.com/LensPlatform/cube_users
 
 COPY . .
 
 RUN go get github.com/githubnemo/CompileDaemon
 
-ENTRYPOINT CompileDaemon -color=true -log-prefix=true -graceful-kill=true -exclude-dir=.git -build="go build ./src" --command= ./
+ENTRYPOINT CompileDaemon -color=true -log-prefix=true -graceful-kill=true -exclude-dir=.git -build="go build ./cmd" --command= ./cmd/

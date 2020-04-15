@@ -10,6 +10,9 @@ import (
 
 type IDatabase interface {
 	CreateUser(user model.User) error
+
+	DoesUserExists(user_id int32, username, email string) (error, bool)
+	DoesUserProfileExists(user_id, profile_id int32) (error, bool)
 	/*
 		CreateUserProfile(user_id int32, profile model.Profile) error
 		CreateUserSubscription(user_id int32, subscription model.Subscriptions) error
@@ -35,8 +38,6 @@ type IDatabase interface {
 		GetAllUserProfilesByNationality(nationality string, limit int32) (error, []*model.Profile)
 		GetUserSubscriptions(user_id, subscription_id int32) (error, []*model.Subscriptions)
 
-		DoesUserExists(user_id int32, username, email string) (error, bool)
-		DoesUserProfileExists(user_id, profile_id int32) (error, bool)
 		DoesUserSubscriptionExists(user_id, subscription_id int32) (error, bool)
 
 		CreateTeam(team model.Team) error
@@ -94,6 +95,7 @@ func New(conn string, logger log.Logger) (error, *Database) {
 
 	db.SingularTable(true)
 	db.LogMode(false)
+	db = db.Set("gorm:auto_preload", true)
 
 	logger.Log("Auto Migrating database models")
 
