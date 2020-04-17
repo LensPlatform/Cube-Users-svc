@@ -14,5 +14,7 @@ gk-cli
 glide.lock
 vendor/
 
+main
+tmp
 .idea
 *.iml

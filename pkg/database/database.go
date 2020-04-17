@@ -12,17 +12,26 @@ import (
 
 type IDatabase interface {
 	CreateUser(user model.User) error
-
 	CreateUserProfile(user_id int32, profile model.Profile) error
+	CreateUserSubscription(user_id int32, subscription model.Subscriptions) error
+	CreateUserSubscriptions(user_id int32, subscriptions []model.Subscriptions) error
+
 	GetUserById(user_id int32) (error, *model.User)
 	DoesUserExists(user_id int32, username, email string) (error, bool)
 	DoesUserProfileExists(user_id, profile_id int32) (error, bool)
-	/*
-		CreateUserSubscription(user_id int32, subscription model.Subscriptions) error
-		CreateUserSubscriptions(user_id int32, subscriptions []model.Subscriptions) error
+	DoesSubscriptionExist(subscription_name string, user_id int32) (error, bool)
+	DoesSubscriptionExistById(user_id, subscription_id int32) (error, bool)
 
-		UpdateUser(user_id int32, user model.User) (error, *model.User)
-		UpdateUserProfile(user_id, profile_id int32, profile model.Profile) (error, *model.Profile)
+	UpdateUser(user_id int32, user model.User) (error, *model.User)
+	UpdateUserProfile(user_id, profile_id int32, profile model.Profile) (error, *model.Profile)
+	UpdateUserSubscription(user_id int32, subscription_id int32, subscription model.Subscriptions) (error, *model.Subscriptions)
+
+	DeleteUser(user_id int32) error
+	DeleteUserProfile(user_id, profile_id int32) error
+	DeleteUserSubscription(user_id, subscription_id int32) error
+
+	/*
+
 		UpdateUserSubscription(user_id int32, subscription_id int32, subscription model.Subscriptions) (error, *model.Subscriptions)
 
 		DeleteUser(user_id int32) error
@@ -40,7 +49,6 @@ type IDatabase interface {
 		GetAllUserProfilesByNationality(nationality string, limit int32) (error, []*model.Profile)
 		GetUserSubscriptions(user_id, subscription_id int32) (error, []*model.Subscriptions)
 
-		DoesUserSubscriptionExists(user_id, subscription_id int32) (error, bool)
 
 		CreateTeam(team model.Team) error
 		CreateTeamProfile(team_id int32, profile model.TeamProfile) error

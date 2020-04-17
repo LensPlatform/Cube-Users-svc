@@ -10,7 +10,7 @@ import gorm1 "github.com/jinzhu/gorm"
 import fmt "fmt"
 import math "math"
 
-// Reference imports to suppress errors if they are not otherwise used.
+// Reference imports to suppress customerror if they are not otherwise used.
 var _ = fmt.Errorf
 var _ = math.Inf
 

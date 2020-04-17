@@ -4,33 +4,29 @@ import (
 	"context"
 	"errors"
 
+	"github.com/LensPlatform/micro/pkg/helper/types"
 	model "github.com/LensPlatform/micro/pkg/models/proto"
 	"github.com/jinzhu/gorm"
 )
 
 func (db *Database) CreateUser(user model.User) error {
 	functor := func(tx *gorm.DB) error {
-		var foundUser model.UserORM
-		ctx := context.TODO()
-		err := user.Validate()
-		if err != nil {
-			return err
-		}
+		var userOrm model.UserORM
 
 		// check if the user exists in the database based off of
 		// email and username
 		// Note: Email and Usernames must be unique across the entire database
-		if err = tx.Where("email = ?", user.Email).Or("username = ?", user.UserName).Find(&foundUser).Error; err != nil {
+		if err := tx.Where("email = ? AND username = ?", user.Email, user.UserName).Find(&userOrm).Error; err != nil {
 			return err
 		}
 
 		// if the user already exists raise an error
-		if foundUser.UserName != "" || foundUser.Email != "" {
+		if userOrm.UserName != "" || userOrm.Email != "" || userOrm.Id == 0 {
 			return errors.New("user already exists")
 		}
 
 		// convert the user field to orm
-		userOrm, err := user.ToORM(ctx)
+		userOrm, err := user.ToORM(context.TODO())
 		if err != nil {
 			return err
 		}
@@ -48,15 +44,14 @@ func (db *Database) CreateUser(user model.User) error {
 
 func (db *Database) GetUserById(user_id int32) (error, *model.User) {
 	// query the database for the user of interest
-	var user model.UserORM
+	var userOrm model.UserORM
 
-	if err := db.Engine.Where("id = ?", user_id).Find(&user).Error; err != nil {
+	if err := db.Engine.Where("id = ?", user_id).Find(&userOrm).Error; err != nil {
 		return err, &model.User{}
 	}
 
 	// convert the obtained user ORM object to a user object and validate all fields are there
-	ctx := context.TODO()
-	userObj, err := user.ToPB(ctx)
+	userObj, err := userOrm.ToPB(context.TODO())
 	if err != nil {
 		return err, &model.User{}
 	}
@@ -72,9 +67,10 @@ func (db *Database) GetUserById(user_id int32) (error, *model.User) {
 func (db *Database) CreateUserProfile(user_id int32, profile model.Profile) error {
 	functor := func(tx *gorm.DB) error {
 		var userOrm model.UserORM
+
+		// check that the user exists
 		err, exists := db.DoesUserExists(user_id, "", "")
-		if !exists && err != nil {
-			db.Logger.Log(err.Error())
+		if !exists {
 			return err
 		}
 
@@ -83,35 +79,23 @@ func (db *Database) CreateUserProfile(user_id int32, profile model.Profile) erro
 			return err
 		}
 
-		ctx := context.TODO()
-		userObj, err := userOrm.ToPB(ctx)
-		if err != nil {
-			return err
-		}
-
-		// validate that the user has all the fields of interest
-		if err = userObj.Validate(); err != nil {
-			return err
-		}
-
-		// validate that the profile has al fields of interest as well
-		if err = profile.Validate(); err != nil {
-			return err
+		if userOrm.Id == 0 || userOrm.UserName == "" || userOrm.LastName == "" {
+			return errors.New("user does not exist")
 		}
 
 		// check that the same profile does not already exist
-		err, profileExsts := db.DoesUserProfileExists(user_id)
-		if err != nil && !profileExsts {
-			return nil
+		err, profileExists := db.DoesUserProfileExists(user_id)
+		if profileExists {
+			return err
 		}
 
 		// update the user ORM object with the profile ORM object
-		profileOrm, err := profile.ToORM(ctx)
+		profileOrm, err := profile.ToORM(context.TODO())
 		if err != nil {
-			return nil
+			return err
 		}
 
-		// Updates all fields in a user entity in the database
+		// Updates only the relevant fields of interest in a user entity in the database
 		if err = tx.Model(userOrm).Updates(model.UserORM{ProfileId: &profileOrm}).Error; err != nil {
 			return err
 		}
@@ -122,104 +106,309 @@ func (db *Database) CreateUserProfile(user_id int32, profile model.Profile) erro
 	return db.PerformTransaction(functor)
 }
 
-func (db *Database) DoesUserExists(user_id int32, username, email string) (error, bool) {
-	functor := func(tx *gorm.DB) error {
-		// check if the user exists based on username, email and id
-		var user model.UserORM
+func (db *Database) CreateUserSubscription(user_id int32, subscription model.Subscriptions) error {
+	// There are no assumptions about the state of the database with respect to the current
+	// subscription. Hence validation should be performed
+	// prior to the subscription being created
 
-		if user_id != 0 && username != "" && email != "" {
-			if err := tx.Where("id = ? AND email = ? AND username = ?", user_id, email, username).Find(&user).Error; err != nil {
-				return err
-			}
-		} else if user_id != 0 && username == "" && email == "" {
-			// user name and email is empty so obtain user by querying for user id
-			if err := tx.Where("id = ?", user_id).Find(&user).Error; err != nil {
-				return err
-			}
-		} else {
-			return errors.New("Invalid input parameters")
+	functor := func(tx *gorm.DB) error {
+		var (
+			userOrm       model.UserORM
+			subscriptions []*model.SubscriptionsORM
+		)
+
+		// validate the subscription object
+		if subscription.SubscriptionName == "" ||
+			subscription.StartDate == nil ||
+			subscription.EndDate == nil ||
+			subscription.SubscriptionStatus == "" {
+			return errors.New("invalid subscription")
 		}
 
-		// Convert the userORM to user object and perform validation checks
-		ctx := context.TODO()
-		userObj, err := user.ToPB(ctx)
+		// check and make sure the  user account with the specified userid exists
+		err, exist := db.DoesUserExists(user_id, types.Empty, types.Empty)
+		if !exist {
+			return err
+		}
+
+		// obtain the user based off of user_id
+		if err := tx.Where("id = ?", user_id).Find(&userOrm).Error; err != nil {
+			return err
+		}
+
+		if userOrm.Id == 0 {
+			return errors.New("user account does not exist")
+		}
+
+		// convert the subscription object to an ORM type
+		subscriptionOrm, err := subscription.ToORM(context.TODO())
 		if err != nil {
 			return err
 		}
 
-		// Actually perfom field validation
-		if err := userObj.Validate(); err != nil {
+		err, exist = db.DoesSubscriptionExist(subscriptionOrm.SubscriptionName, user_id)
+		if exist {
+			// iterate over all of the user's subscriptions and update the status of the subscription to active
+			for _, subsc := range userOrm.SubscriptionsId {
+				if subsc.SubscriptionName == subscriptionOrm.SubscriptionName {
+					// activate the subscription if it is not already active
+					subsc.IsActive = true
+					subsc.EndDate = subscriptionOrm.EndDate
+				}
+				subscriptions = append(subscriptions, subsc)
+			}
+			userOrm.SubscriptionsId = subscriptions
+		} else {
+			// just add the new subscription to the user orm
+			subscriptions = append(subscriptions, &subscriptionOrm)
+			userOrm.SubscriptionsId = subscriptions
+		}
+
+		// save the user
+		if err = tx.Save(userOrm).Error; err != nil {
 			return err
 		}
 
-		// Validate that the obtained user is in fact populated
-		if user.Id == 0 {
-			return errors.New("User Does Not Exist")
-		}
-
 		return nil
 	}
 
-	err := db.PerformTransaction(functor)
-	if err != nil {
-		db.Logger.Log(err.Error())
-		return err, false
-	}
-
-	return nil, true
+	return db.PerformTransaction(functor)
 }
 
-func (db *Database) DoesUserProfileExists(user_id int32) (error, bool) {
-	functor := func(tx *gorm.DB) error {
-		var profile model.ProfileORM
-		var user model.UserORM
+func (db *Database) UpdateUser(user_id int32, user model.User) (error, *model.User) {
 
-		// preliminarily, check if the user account exists
-		e0, exists := db.DoesUserExists(user_id, "", "")
-		if !exists {
-			db.Logger.Log(e0.Error())
-			return errors.New("User account does not exist. Create an account before a profile")
+	transaction := func(tx *gorm.DB) (error, interface{}) {
+		// first and foremost we check for the existence of the user
+		err, exist := db.DoesUserExists(user_id, types.Empty, types.Empty)
+		if !exist {
+			return err, &model.User{}
 		}
 
-		// if the user account does exist, query the user table for the user of interest
-		// and return an error if one arises
-		if e0 = tx.Where("id = ?", user_id).Find(&user).Error; e0 != nil {
-			return e0
+		// convert the user to an ORM type
+		userOrm, err := user.ToORM(context.TODO())
+		if err != nil {
+			return err, &model.User{}
 		}
 
-		ctx := context.TODO()
-
-		// convert the returned userORM to a user object and validate that all
-		// fields of interest are present
-		userProfile, e0 := profile.ToPB(ctx)
-		if e0 != nil {
-			return e0
+		// update the actual user in the database
+		if err := tx.Save(&userOrm).Error; err != nil {
+			tx.Rollback()
+			return err, &model.User{}
 		}
 
-		// if the user object witholds invalid fields, return an error
-		if e0 = userProfile.Validate(); e0 != nil {
-			return e0
+		return nil, user
+	}
+
+	err, output := db.PerformComplexTransaction(transaction)
+
+	if err != nil {
+		return err, &model.User{}
+	}
+
+	updatedUser := output.(model.User)
+	return nil, &updatedUser
+}
+
+func (db *Database) UpdateUserSubscription(user_id int32, subscription_id int32, subscription model.Subscriptions) (error, *model.Subscriptions) {
+	transaction := func(tx *gorm.DB) (error, interface{}) {
+		var (
+			userOrm              model.UserORM
+			updatedSubscriptions []*model.SubscriptionsORM
+		)
+		// first and foremost we check for the existence of the user account
+		// and the subscription
+		err, exist := db.DoesSubscriptionExist(subscription.SubscriptionName, user_id)
+		if !exist {
+			return err, &model.Subscriptions{}
 		}
 
-		// after validating the user object's fields, obtain the profile of interest from the user table
-		profile = *user.ProfileId
+		// obtain the user from the database
+		if err := tx.Where("id = ?", user_id).Find(userOrm).Error; err != nil {
+			return err, &model.Subscriptions{}
+		}
 
-		// Return an error if the obtained profile object witholds a nil id
-		if profile.Id == 0 {
-			return errors.New("Profile Of Interest Does Not Exist")
+		// convert the profile to an ORM type
+		subscriptionOrm, err := subscription.ToORM(context.TODO())
+		if err != nil {
+			return err, &model.Subscriptions{}
+		}
+
+		for _, oldSubscription := range userOrm.SubscriptionsId {
+			if oldSubscription.SubscriptionName == subscriptionOrm.SubscriptionName {
+				updatedSubscriptions = append(updatedSubscriptions, &subscriptionOrm)
+			} else {
+				updatedSubscriptions = append(updatedSubscriptions, oldSubscription)
+			}
+		}
+
+		// update the subscription list tied to the user
+		userOrm.SubscriptionsId = updatedSubscriptions
+
+		// update the actual user in the database
+		if err := tx.Save(&userOrm).Error; err != nil {
+			tx.Rollback()
+			return err, &model.Profile{}
+		}
+
+		return nil, &subscription
+	}
+
+	err, output := db.PerformComplexTransaction(transaction)
+
+	if err != nil {
+		return err, &model.Subscriptions{}
+	}
+
+	updatedSubscription := output.(model.Subscriptions)
+	return nil, &updatedSubscription
+}
+
+func (db *Database) UpdateUserProfile(user_id, profile_id int32, profile model.Profile) (error, *model.Profile) {
+	transaction := func(tx *gorm.DB) (error, interface{}) {
+		var userOrm model.UserORM
+
+		// first and foremost we check for the existence of the user account
+		// and the profile
+		err, exist := db.DoesUserProfileExists(user_id)
+		if !exist {
+			return err, &model.Profile{}
+		}
+
+		// obtain the user from the database
+		if err := tx.Where("id = ?", user_id).Find(userOrm).Error; err != nil {
+			return err, &model.Profile{}
+		}
+
+		// convert the profile to an ORM type
+		profileOrm, err := profile.ToORM(context.TODO())
+		if err != nil {
+			return err, &model.Profile{}
+		}
+
+		// update the profile tied to the user
+		userOrm.ProfileId = &profileOrm
+
+		// update the actual user in the database
+		if err := tx.Save(&userOrm).Error; err != nil {
+			tx.Rollback()
+			return err, &model.Profile{}
+		}
+
+		return nil, profile
+	}
+
+	err, output := db.PerformComplexTransaction(transaction)
+
+	if err != nil {
+		return err, &model.Profile{}
+	}
+
+	updatedProfile := output.(model.Profile)
+	return nil, &updatedProfile
+}
+
+func (db *Database) DeleteUser(user_id int32) error {
+	transaction := func(tx *gorm.DB) error {
+		var userOrm model.UserORM
+
+		err, exist := db.DoesUserExists(user_id, types.Empty, types.Empty)
+		if !exist {
+			return err
+		}
+
+		// obtain user of interest
+		if err := tx.First(&userOrm, user_id).Error; err != nil {
+			return err
+		}
+
+		// delete user from dab
+		if err = tx.Where("id =?", user_id).Delete(&userOrm).Error; err != nil {
+			return err
 		}
 
 		return nil
 	}
 
-	err := db.PerformTransaction(functor)
-	if err != nil {
-		return err, false
+	return db.PerformTransaction(transaction)
+}
+
+func (db *Database) DeleteUserProfile(user_id, profile_id int32) error {
+	transaction := func(tx *gorm.DB) error {
+		var userOrm model.UserORM
+
+		// check the user of interest has a profile to even delete
+		err, exist := db.DoesUserProfileExists(user_id)
+		if !exist {
+			return err
+		}
+
+		// obtain user of interest
+		if err := tx.First(&userOrm, user_id).Error; err != nil {
+			return err
+		}
+
+		// obtain the profile from the user account returned from the database
+		profileOrm := *userOrm.ProfileId
+
+		if profileOrm.Id != profile_id {
+			return errors.New("profiled id doest not exist for this user.")
+		}
+
+		// delete user from dab
+		if err = tx.Where("id = ?", profile_id).Delete(&profileOrm).Error; err != nil {
+			return err
+		}
+
+		return nil
 	}
 
-	return nil, true
+	return db.PerformTransaction(transaction)
+}
+
+func (db *Database) DeleteUserSubscription(user_id, subscription_id int32) error {
+	transaction := func(tx *gorm.DB) error {
+		// check the user of interest exists
+		err, exist := db.DoesUserExists(user_id, types.Empty, types.Empty)
+		if !exist {
+			return err
+		}
+
+		err, exist = db.DoesSubscriptionExistById(user_id, subscription_id)
+		if !exist {
+			return err
+		}
+
+		// delete from subscriptions table in db where id == subscriptions id
+		if err = tx.Where("id = ?", subscription_id).Delete(&model.SubscriptionsORM{}).Error; err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	return db.PerformTransaction(transaction)
 }
 
 func (db *Database) PerformTransaction(functor func(tx *gorm.DB) error) error {
 	return db.Engine.Transaction(functor)
+}
+
+func (db *Database) PerformComplexTransaction(transaction func(tx *gorm.DB) (error, interface{})) (error, interface{}) {
+	tx := db.Engine.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		return err, nil
+	}
+
+	err, result := transaction(tx)
+	if err != nil {
+		return err, nil
+	}
+
+	return tx.Commit().Error, result
 }

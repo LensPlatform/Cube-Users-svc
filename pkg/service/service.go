@@ -5,10 +5,11 @@ import (
 	"errors"
 	"os"
 
+	"github.com/go-kit/kit/log"
+
 	"github.com/LensPlatform/micro/pkg/database"
 	"github.com/LensPlatform/micro/pkg/helper"
 	model "github.com/LensPlatform/micro/pkg/models/proto"
-	"github.com/go-kit/kit/log"
 )
 
 // MicroService describes the service.
@@ -81,7 +82,7 @@ type MicroService interface {
 }
 
 type basicMicroService struct {
-	db *Database
+	db *database.Database
 }
 
 func (b *basicMicroService) CreateUser(ctx context.Context, user model.User) (e0 error) {
@@ -101,53 +102,71 @@ func (b *basicMicroService) CreateUser(ctx context.Context, user model.User) (e0
 	return nil
 }
 func (b *basicMicroService) CreateProfile(ctx context.Context, user_id int32, profile model.Profile) (e0 error) {
-	_, exists := b.db.DoesUserExists(user_id, "", "")
-	if exists {
-		// query the database for the profile and check for existence
-		_, profileExists := b.db.DoesUserProfileExists(user_id)
-
-		if profileExists {
-			return errors.New("User profile already exists")
-		} else {
-			return b.db.CreateUserProfile(user_id, profile)
-		}
-	} else {
-		return errors.New("User account does not exist. Please create a user account before creating a profile")
+	if e0 = b.db.CreateUserProfile(user_id, profile); e0 != nil {
+		return e0
 	}
 
 	return nil
 }
 func (b *basicMicroService) CreateSubscription(ctx context.Context, user_id int32, subscription model.Subscriptions) (e0 error) {
-	// TODO implement the business logic of CreateSubscription
-	return e0
+	// check that the user of interests actually exists in the backend store
+	if e0 = b.db.CreateUserSubscription(user_id, subscription); e0 != nil {
+		return e0
+	}
+
+	return nil
 }
 func (b *basicMicroService) CreateSubscriptions(ctx context.Context, user_id []model.Subscriptions, subscriptions []model.Subscriptions) (e0 error) {
 	// TODO implement the business logic of CreateSubscriptions
 	return e0
 }
 func (b *basicMicroService) UpdateUser(ctx context.Context, user_id int32, user model.User) (e0 error, m1 model.User) {
-	// TODO implement the business logic of UpdateUser
-	return e0, m1
+	e0, updatedUser := b.db.UpdateUser(user_id, user)
+	if e0 != nil {
+		return e0, model.User{}
+	}
+
+	m1 = *updatedUser
+	return nil, m1
 }
 func (b *basicMicroService) UpdateUserProfile(ctx context.Context, user_id int32, profile_id int32, profile model.Profile) (e0 error, m1 model.Profile) {
-	// TODO implement the business logic of UpdateUserProfile
-	return e0, m1
+	e0, updatedProfile := b.db.UpdateUserProfile(user_id, profile_id, profile)
+	if e0 != nil {
+		return e0, model.Profile{}
+	}
+
+	m1 = *updatedProfile
+	return nil, m1
 }
 func (b *basicMicroService) UpdateUserSubscription(ctx context.Context, user_id int32, subscription_id int32, subscription model.Subscriptions) (e0 error, m1 model.Subscriptions) {
-	// TODO implement the business logic of UpdateUserSubscription
-	return e0, m1
+	e0, updatedSubscription := b.db.UpdateUserSubscription(user_id, subscription_id, subscription)
+	if e0 != nil {
+		return e0, model.Subscriptions{}
+	}
+
+	m1 = *updatedSubscription
+	return nil, m1
 }
 func (b *basicMicroService) DeleteUser(ctx context.Context, user_id int32) (e0 error) {
-	// TODO implement the business logic of DeleteUser
-	return e0
+	if e0 := b.db.DeleteUser(user_id); e0 != nil {
+		return e0
+	}
+
+	return nil
 }
 func (b *basicMicroService) DeleteUserProfile(ctx context.Context, user_id int32, profile_id int32) (e0 error) {
-	// TODO implement the business logic of DeleteUserProfile
-	return e0
+	if e0 := b.db.DeleteUserProfile(user_id, profile_id); e0 != nil {
+		return e0
+	}
+
+	return nil
 }
 func (b *basicMicroService) DeleteSubscription(ctx context.Context, user_id int32, subscription_id int32) (e0 error) {
-	// TODO implement the business logic of DeleteSubscription
-	return e0
+	if e0 := b.db.DeleteUserSubscription(user_id, subscription_id); e0 != nil {
+		return e0
+	}
+
+	return nil
 }
 func (b *basicMicroService) GetUser(ctx context.Context, user_id int32) (e0 error, m1 model.User) {
 	e0, user := b.db.GetUserById(user_id)
@@ -352,7 +371,7 @@ func (b *basicMicroService) GetGroupsByTags(ctx context.Context, tags string, li
 
 // NewBasicMicroService returns a naive, stateless implementation of MicroService.
 func NewBasicMicroService(conn string, logger log.Logger) MicroService {
-	err, db := New(conn, logger)
+	err, db := database.New(conn, logger)
 	if err != nil {
 		logger.Log(err.Error())
 		os.Exit(1)
@@ -364,7 +383,7 @@ func NewBasicMicroService(conn string, logger log.Logger) MicroService {
 
 // New returns a MicroService with all of the expected middleware wired in.
 func New(middleware []Middleware, conn string, logger log.Logger) MicroService {
-	var svc MicroService = NewBasicMicroService(conn, logger)
+	var svc = NewBasicMicroService(conn, logger)
 	for _, m := range middleware {
 		svc = m(svc)
 	}

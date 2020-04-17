@@ -1247,7 +1247,7 @@ func file_proto_user_service_proto_init() {
 	file_proto_user_service_proto_depIdxs = nil
 }
 
-// Reference imports to suppress errors if they are not otherwise used.
+// Reference imports to suppress customerror if they are not otherwise used.
 var _ context.Context
 var _ grpc.ClientConnInterface
 

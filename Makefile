@@ -20,7 +20,8 @@ clean-and-start:
 
 format:
 	gofmt -s -w .
-	$GOPATH/bin/goimports -w **/*.go
+	go fmt ./...
+	# $GOPATH/bin/goimports -w **/*.go
 
 start:
 	@echo "starting up services specified in docker-compose"

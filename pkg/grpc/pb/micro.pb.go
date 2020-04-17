@@ -13,7 +13,7 @@ import (
 	math "math"
 )
 
-// Reference imports to suppress errors if they are not otherwise used.
+// Reference imports to suppress customerror if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
@@ -3908,7 +3908,7 @@ var fileDescriptor_9a6883cf49b447bc = []byte{
 	0xf3, 0x87, 0xff, 0x03, 0x00, 0x00, 0xff, 0xff, 0x55, 0x8a, 0x17, 0x7f, 0xed, 0x1c, 0x00, 0x00,
 }
 
-// Reference imports to suppress errors if they are not otherwise used.
+// Reference imports to suppress customerror if they are not otherwise used.
 var _ context.Context
 var _ grpc.ClientConnInterface
 
