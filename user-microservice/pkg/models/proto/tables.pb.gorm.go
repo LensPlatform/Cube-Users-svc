@@ -20,7 +20,7 @@ import math "math"
 import _ "github.com/mwitkow/go-proto-validators"
 import _ "github.com/golang/protobuf/ptypes/timestamp"
 
-// Reference imports to suppress customerror if they are not otherwise used.
+// Reference imports to suppress errors if they are not otherwise used.
 var _ = fmt.Errorf
 var _ = math.Inf
 

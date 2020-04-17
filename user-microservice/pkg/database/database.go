@@ -5,9 +5,10 @@ import (
 
 	"gopkg.in/gormigrate.v1"
 
-	model "github.com/LensPlatform/micro/user-microservice/pkg/models/proto"
 	log "github.com/go-kit/kit/log"
 	"github.com/jinzhu/gorm"
+
+	model "github.com/LensPlatform/micro/user-microservice/pkg/models/proto"
 )
 
 type IDatabase interface {

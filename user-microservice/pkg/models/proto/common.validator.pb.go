@@ -5,14 +5,14 @@ package model
 
 import (
 	fmt "fmt"
-	proto "github.com/golang/protobuf/proto"
-	_ "github.com/golang/protobuf/ptypes/timestamp"
-	_ "github.com/infobloxopen/protoc-gen-gorm/options"
-	github_com_mwitkow_go_proto_validators "github.com/mwitkow/go-proto-validators"
 	math "math"
+	proto "github.com/golang/protobuf/proto"
+	_ "github.com/infobloxopen/protoc-gen-gorm/options"
+	_ "github.com/golang/protobuf/ptypes/timestamp"
+	github_com_mwitkow_go_proto_validators "github.com/mwitkow/go-proto-validators"
 )
 
-// Reference imports to suppress customerror if they are not otherwise used.
+// Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf

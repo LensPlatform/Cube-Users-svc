@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 
+	"github.com/jinzhu/gorm"
+
 	"github.com/LensPlatform/micro/user-microservice/pkg/helper/types"
 	model "github.com/LensPlatform/micro/user-microservice/pkg/models/proto"
-	"github.com/jinzhu/gorm"
 )
 
 func (db *Database) CreateUser(user model.User) error {

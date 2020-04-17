@@ -10,7 +10,7 @@ GIT_COMMIT:=$(shell git describe --dirty --always)
 #VERSION:=$(shell grep 'VERSION' src/pkg/version/version.go | awk '{ print $$4 }' | tr -d '"')
 
 gen-serv:
-	cd .. && kit g s cube_users && kit g s cube_users -t grpc && kit g cube_users && kit g m hi -s cube_users -e && cd cube_users && kit g d 
+	cd .. && kit g s user-microservice && kit g s user-microservice -t grpc && kit g user-microservice && kit g m hi -s user-microservice -e && cd user-microservice && kit g d
 
 clean:
 	GO111MODULE= ./scripts/cleanup.sh && go clean -modcache
