@@ -5,7 +5,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	model "github.com/LensPlatform/micro/pkg/models/proto"
+	model "github.com/LensPlatform/micro/user-microservice/pkg/models/proto"
 )
 
 func ValidateAndHashPassword(currentuser model.User) (user model.User, err error) {
