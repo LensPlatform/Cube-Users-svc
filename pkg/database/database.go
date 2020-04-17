@@ -3,6 +3,8 @@ package database
 import (
 	"os"
 
+	"gopkg.in/gormigrate.v1"
+
 	model "github.com/LensPlatform/micro/pkg/models/proto"
 	log "github.com/go-kit/kit/log"
 	"github.com/jinzhu/gorm"
@@ -99,7 +101,11 @@ func New(conn string, logger log.Logger) (error, *Database) {
 
 	logger.Log("Auto Migrating database models")
 
-	CreateTablesOrMigrateSchemas(db, logger)
+	err = CreateTablesOrMigrateSchemas(db, logger)
+	if err != nil {
+		logger.Log(err.Error())
+		os.Exit(1)
+	}
 
 	logger.Log("Auto Migration of database models complete")
 
@@ -111,10 +117,31 @@ func New(conn string, logger log.Logger) (error, *Database) {
 
 // CreateTablesOrMigrateSchemas creates a given set of models based on a schema
 // if it does not exist or migrates the model schemas to the latest version
-func CreateTablesOrMigrateSchemas(db *gorm.DB, logger log.Logger) {
-	db.AutoMigrate(model.AddressORM{}, model.EducationORM{}, model.MediaORM{}, model.SubscriptionsORM{}, model.SocialMediaORM{},
-		model.DetailsORM{}, model.ExperienceORM{}, model.InvestmentORM{}, model.UserORM{}, model.ProfileORM{}, model.GroupORM{},
-		model.TeamORM{}, model.TeamProfileORM{}, model.InvestorDetailORM{}, model.StartupDetailORM{}, model.SettingsORM{}, model.LoginActivityORM{},
-		model.PaymentsORM{}, model.CardORM{}, model.PinORM{}, model.Privacy{}, model.NotificationORM{}, model.PostAndCommentsPushNotificationORM{},
-		model.FollowingAndFollowersPushNotificationORM{}, model.DirectMessagesPushNotificationORM{}, model.EmailAndSmsPushNotificationORM{})
+func CreateTablesOrMigrateSchemas(db *gorm.DB, logger log.Logger) error {
+	migration := gormigrate.New(db, gormigrate.DefaultOptions, []*gormigrate.Migration{
+		{
+			ID: "20200416",
+			Migrate: func(tx *gorm.DB) error {
+				return tx.AutoMigrate(model.AddressORM{}, model.EducationORM{}, model.MediaORM{}, model.SubscriptionsORM{}, model.SocialMediaORM{},
+					model.DetailsORM{}, model.ExperienceORM{}, model.InvestmentORM{}, model.UserORM{}, model.ProfileORM{}, model.GroupORM{},
+					model.TeamORM{}, model.TeamProfileORM{}, model.InvestorDetailORM{}, model.StartupDetailORM{}, model.SettingsORM{}, model.LoginActivityORM{},
+					model.PaymentsORM{}, model.CardORM{}, model.PinORM{}, model.Privacy{}, model.NotificationORM{}, model.PostAndCommentsPushNotificationORM{},
+					model.FollowingAndFollowersPushNotificationORM{}, model.DirectMessagesPushNotificationORM{}, model.EmailAndSmsPushNotificationORM{}).Error
+			},
+			Rollback: func(tx *gorm.DB) error {
+				return tx.DropTable(model.AddressORM{}, model.EducationORM{}, model.MediaORM{}, model.SubscriptionsORM{}, model.SocialMediaORM{},
+					model.DetailsORM{}, model.ExperienceORM{}, model.InvestmentORM{}, model.UserORM{}, model.ProfileORM{}, model.GroupORM{},
+					model.TeamORM{}, model.TeamProfileORM{}, model.InvestorDetailORM{}, model.StartupDetailORM{}, model.SettingsORM{}, model.LoginActivityORM{},
+					model.PaymentsORM{}, model.CardORM{}, model.PinORM{}, model.Privacy{}, model.NotificationORM{}, model.PostAndCommentsPushNotificationORM{},
+					model.FollowingAndFollowersPushNotificationORM{}, model.DirectMessagesPushNotificationORM{}, model.EmailAndSmsPushNotificationORM{}).Error
+			},
+		},
+	})
+
+	err := migration.Migrate()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

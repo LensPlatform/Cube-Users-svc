@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/LensPlatform/micro/pkg/database"
+	"github.com/LensPlatform/micro/pkg/helper"
 	model "github.com/LensPlatform/micro/pkg/models/proto"
 	"github.com/go-kit/kit/log"
 )
@@ -80,12 +81,17 @@ type MicroService interface {
 }
 
 type basicMicroService struct {
-	db *database.Database
+	db *Database
 }
 
 func (b *basicMicroService) CreateUser(ctx context.Context, user model.User) (e0 error) {
 	if user.UserName == "" || user.Email == "" {
 		return errors.New("Invalid input parameters. User email and username does not exist.")
+	}
+
+	user, e0 = helper.ValidateAndHashPassword(user)
+	if e0 != nil {
+		return e0
 	}
 
 	e0 = b.db.CreateUser(user)
@@ -103,7 +109,6 @@ func (b *basicMicroService) CreateProfile(ctx context.Context, user_id int32, pr
 		if profileExists {
 			return errors.New("User profile already exists")
 		} else {
-			// TODO implement create profile database interaction
 			return b.db.CreateUserProfile(user_id, profile)
 		}
 	} else {
@@ -347,7 +352,7 @@ func (b *basicMicroService) GetGroupsByTags(ctx context.Context, tags string, li
 
 // NewBasicMicroService returns a naive, stateless implementation of MicroService.
 func NewBasicMicroService(conn string, logger log.Logger) MicroService {
-	err, db := database.New(conn, logger)
+	err, db := New(conn, logger)
 	if err != nil {
 		logger.Log(err.Error())
 		os.Exit(1)

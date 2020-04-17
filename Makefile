@@ -13,7 +13,10 @@ gen-serv:
 	cd .. && kit g s cube_users && kit g s cube_users -t grpc && kit g cube_users && kit g m hi -s cube_users -e && cd cube_users && kit g d 
 
 clean:
-	GO111MODULE= cd src && ./scripts/cleanup.sh && cd .. && go clean -modcache
+	GO111MODULE= ./scripts/cleanup.sh && go clean -modcache
+
+clean-and-start:
+	GO111MODULE= ./scripts/cleanup.sh && go clean -modcache && ./scripts/startservice.sh
 
 format:
 	gofmt -s -w .
@@ -60,7 +63,7 @@ build-container:
 # 	docker run --publish  8805:8085 --name bb $(DOCKER_IMAGE_NAME):$(VERSION) -v .:/go/src/Lens
 run-container:
 	docker build --tag $(DOCKER_IMAGE_NAME):$(VERSION) .
-	docker run  -v /Users/yoanyomba/go/src/github.com/LensPlatform/cube_users/cmd:/go/src/github.com/LensPlatform/cube_users/cmd --publish  8805:8085 --name bb $(DOCKER_IMAGE_NAME):$(VERSION)
+	docker run  -v /Users/yoanyomba/go/src/github.com/LensPlatform/cube_users/cmd:/go/src/github.com/LensPlatform/cube_users/cmd --publish 8085:8085 8086:8086 8087:8087 --name bb $(DOCKER_IMAGE_NAME):$(VERSION)
 
 test-container:
 	@docker rm -f podinfo || true

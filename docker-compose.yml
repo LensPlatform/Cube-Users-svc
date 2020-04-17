@@ -71,15 +71,16 @@ services:
     depends_on:
       - storage
 
-  users-v2:
+  cube_platform-users:
     build:
       context: .
       dockerfile: ./Dockerfile
-    container_name: users-v2
+    #container_name: users-microservice
     ports:
-      - 8805:8085
-      - 8804:8084
-      - 8081:8081
+      - 8186:8086
+      - 8187:8087
+      - 8188:8088
+      - 8189:8089
     restart: always
     networks:
       - monitor-net
